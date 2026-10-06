@@ -111,6 +111,8 @@ dialog::backdrop{background:rgba(10,12,14,.55)}
 body{padding-bottom:96px}
 .rulechain{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .rulechain .arrow{color:var(--muted)}
+.pair{display:inline-flex;align-items:center;gap:4px}
+a.btn{text-decoration:none;display:inline-block}
 .btn.mini{padding:4px 9px;font-size:.78rem;white-space:nowrap}
 .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .btn.primary[aria-pressed]{color:var(--accent-ink)}
@@ -267,8 +269,9 @@ const EXERCISES=[
   {rud:"Reverse paradiddle",stk:"RR>LR LL>RL",how:"Walk the toms one group per drum first, then accents to toms",rule:"1, 2",play:[
     {rule:1,grid:4,seq:"Rsn Rsn Lsn Rsn Lt1 Lt1 Rt1 Lt1 Rt2 Rt2 Lt2 Rt2 Lft Lft Rft Lft"},
     {rule:2,grid:4,seq:"Rsn. Rsn. L>t1 Rsn. Lsn. Lsn. R>ft Lsn. Rsn. Rsn. L>t1 Rsn. Lsn. Lsn. R>ft Lsn."}]},
-  {rud:"Six-stroke roll",stk:">R ll rr >L",how:"R accent floor tom, L accent rack tom, doubles on snare",rule:"2",play:[
-    {rule:2,grid:6,seq:"R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1"}]},
+  {rud:"Six-stroke roll",stk:">R ll rr >L",how:"R accent floor tom, L accent rack tom, doubles on snare; then kick the diddles: swap the second note of each double for the kick (>R l K r K >L)",rule:"2, 6",play:[
+    {rule:2,grid:6,seq:"R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1"},
+    {rule:6,grid:6,seq:"R>ft Lsn. K Rsn. K L>t1 R>ft Lsn. K Rsn. K L>t1 R>ft Lsn. K Rsn. K L>t1 R>ft Lsn. K Rsn. K L>t1"}]},
   {rud:"Five-stroke roll",stk:"rr ll >R",how:"Move the doubles down the toms, then accent on floor tom + kick",rule:"1, 2",play:[
     {rule:1,grid:4,seq:"Rsn Rsn Lt1 Lt1 R>t2 - - - Lt2 Lt2 Rft Rft L>cr+k - - -"},
     {rule:2,grid:4,seq:"Rsn. Rsn. Lsn. Lsn. R>ft+k - - - Lsn. Lsn. Rsn. Rsn. L>t1+k - - -"}]},
@@ -295,14 +298,16 @@ function renderRoadmap(){
   $("#rail").innerHTML=BLOCKS.map((b,i)=>`<div class="stage${gates[i]?" done":""}${i===cur&&!allDone?" now":""}"><span class="lbl">Weeks ${b.weeks}</span><span class="wk">${esc(b.fam)}</span><small>${gates[i]?"✓ Gate passed":i===cur?"In progress":"Up next"}</small></div>`).join("");
   const b=BLOCKS[cur];
   $("#current").innerHTML=allDone?`<p class="gate"><b>All four gates passed.</b> Loop back to week 1 with a new rule per rudiment, or pick rudiments from the Vic Firth 40 you haven't touched.</p>`:
-    `<div class="row">${b.rud.map(r=>`<span class="chip now">${esc(r)}</span>`).join("")}</div>
-     <div class="rulechain"><span class="lbl">Rules in order</span>${b.rules.map((n,k)=>`${k?'<span class="arrow">→</span>':""}<span class="chip">${k?"Then":"Start with"}: ${esc(RULES[n-1])} <small style="color:var(--muted)">(rule ${n})</small></span>`).join("")}<button class="btn" type="button" data-open="exDlg" style="padding:5px 10px;font-size:.82rem">📋 Exercises</button></div>
+    `<div class="row">${b.rud.map(r=>`<span class="pair"><span class="chip now">${esc(r)}</span><a class="btn mini" href="${YT(VID[r].demo)}" target="_blank" rel="noopener" aria-label="Watch a pro play the ${esc(r)} on YouTube">🎥 Watch</a></span>`).join("")}</div>
+     <div class="rulechain"><span class="lbl">Rules in order</span>${b.rules.map((n,k)=>{const sm=showFor(b,n);return `${k?'<span class="arrow">→</span>':""}<span class="pair"><span class="chip">${k?"Then":"Start with"}: ${esc(RULES[n-1])} <small style="color:var(--muted)">(rule ${n})</small></span>${sm?`<button class="btn mini" type="button" data-show="${sm}" aria-label="Show rule ${n} on the kit">▶ Show me</button>`:""}</span>`}).join("")}<button class="btn" type="button" data-open="exDlg" style="padding:5px 10px;font-size:.82rem">📋 All exercises</button></div>
      <p class="gate"><span class="lbl">Gate to move on</span><br>${esc(b.gate)}</p>
      <div class="row"><button class="btn" type="button" id="gateBtn">✓ Gate passed, start ${cur<3?"weeks "+BLOCKS[cur+1].weeks:"the loop"}</button><button class="btn" type="button" id="gateBack"${cur>0?"":" disabled"}>Back a block</button></div>`;
   const gb=$("#gateBtn");if(gb)gb.onclick=()=>saveGates(gates.map((g,i)=>i===cur?true:g));
   const bk=$("#gateBack");if(bk)bk.onclick=()=>saveGates(gates.map((g,i)=>i===cur-1?false:g));
   renderForm();renderExercises();
 }
+// first exercise in this block that plays rule n, as "exercise:variant"
+function showFor(b,n){for(let i=0;i<EXERCISES.length;i++){const e=EXERCISES[i];if(!b.rud.includes(e.rud))continue;const k=e.play.findIndex(q=>q.rule===n);if(k>=0)return i+":"+k}return null}
 function saveGates(next){gates=next;local.set("atk-gates",gates);renderRoadmap()}
 
 /* ---------- session timer ---------- */
@@ -390,7 +395,7 @@ function renderProgress(){
 function stick(s){return s.split(/(\s+)/).map(g=>g.replace(/>([A-Za-z])|([a-z])|([A-Z])/g,(m,a,lo,up)=>a?`<span class="acc">&gt;${a}</span>`:lo?`<span class="gh">${lo}</span>`:up)).join("")}
 function renderExercises(){
   const b=BLOCKS[curBlock()],rows=EXERCISES.filter(e=>b.rud.includes(e.rud));
-  $("#exercises").innerHTML=`<table><thead><tr><th>Rudiment</th><th>Sticking</th><th>On the kit</th><th>Hear it</th></tr></thead><tbody>${rows.map(e=>{const ei=EXERCISES.indexOf(e);return `<tr><td>${esc(e.rud)}<a class="vid" href="${YT(VID[e.rud].demo)}" target="_blank" rel="noopener" title="Pro demo of the rudiment on YouTube (Vic Firth)" aria-label="Pro demo video of the ${esc(e.rud)}">🎥</a></td><td class="stk">${stick(e.stk)}</td><td>${esc(e.how)}</td><td><div style="display:grid;gap:4px">${e.play.map((p,k)=>`<button class="btn mini" type="button" data-show="${ei}:${k}">▶ Rule ${p.rule}</button>`).join("")}</div></td></tr>`}).join("")}</tbody></table><p class="sub" style="font-size:.82rem">16th notes unless marked triplets; kick on every quarter underneath. ▶ plays it on a kit at your tempo. 🎥 opens a pro demo of the rudiment on snare.</p>`;
+  $("#exercises").innerHTML=`<table><thead><tr><th>Rudiment</th><th>Sticking</th><th>On the kit</th><th>Hear it</th></tr></thead><tbody>${rows.map(e=>{const ei=EXERCISES.indexOf(e);return `<tr><td>${esc(e.rud)}<a class="vid" href="${YT(VID[e.rud].demo)}" target="_blank" rel="noopener" title="Pro demo of the rudiment on YouTube (Vic Firth)" aria-label="Pro demo video of the ${esc(e.rud)}">🎥</a></td><td class="stk">${stick(e.stk)}</td><td>${esc(e.how)}</td><td><div style="display:grid;gap:4px">${e.play.map((p,k)=>`<button class="btn mini" type="button" data-show="${ei}:${k}">▶ Rule ${p.rule}</button>`).join("")}</div></td></tr>`}).join("")}</tbody></table><p class="sub" style="font-size:.82rem">16th notes (4 per beat) unless marked triplets (3 per beat); kick on every beat underneath, with each metronome click. ▶ plays it on a kit at your tempo. 🎥 opens a pro demo of the rudiment on snare.</p>`;
 }
 $("#rules").innerHTML=RULES.map((r,i)=>`<li><b>${esc(r)}:</b> ${esc(RULE_HOW[i])}</li>`).join("");
 
@@ -403,7 +408,7 @@ const VARIANT=["Inward paradiddle","Reverse paradiddle"];
 const DRUMS={kk:{x:170,y:182,r:30,n:"Kick"},hh:{x:42,y:118,r:27,n:"Hi-hat",c:1},cr:{x:72,y:46,r:34,n:"Crash",c:1},t1:{x:135,y:72,r:26,n:"Tom 1"},t2:{x:200,y:72,r:26,n:"Tom 2"},rd:{x:278,y:58,r:38,n:"Ride",c:1},sn:{x:108,y:150,r:30,n:"Snare"},ft:{x:232,y:152,r:34,n:"Floor"}};
 const SHORT={sn:"SN",t1:"T1",t2:"T2",ft:"FT",rd:"RD",cr:"CR",hh:"HH",kk:"K"};
 $("#kit").innerHTML=Object.entries(DRUMS).map(([k,d])=>`<g class="kd${d.c?" cym":""}" id="k-${k}"><circle class="body" cx="${d.x}" cy="${d.y}" r="${d.r}"/><circle class="glow" cx="${d.x}" cy="${d.y}" r="${d.r}"/><text class="hd" x="${d.x}" y="${d.y+4}"></text><text class="nm" x="${d.x}" y="${d.y+d.r*.62}">${d.n}</text></g>`).join("");
-function parseSeq(seq){return seq.trim().split(/\s+/).map(t=>{if(t==="-")return null;const m=t.match(/^(f?)([RL])(>?)([a-z0-9]{2})(\.?)(?:\/([a-z0-9]{2}))?(\+k)?$/);if(!m||!DRUMS[m[4]])throw new Error("bad note "+t);return{flam:!!m[1],h:m[2],acc:!!m[3],d:m[4],gh:!!m[5],grace:m[6]||null,kick:!!m[7]}})}
+function parseSeq(seq){return seq.trim().split(/\s+/).map(t=>{if(t==="-")return null;if(t==="K")return{h:"K",d:"kk",acc:false,gh:false,flam:false,grace:null,kick:false};const m=t.match(/^(f?)([RL])(>?)([a-z0-9]{2})(\.?)(?:\/([a-z0-9]{2}))?(\+k)?$/);if(!m||!DRUMS[m[4]])throw new Error("bad note "+t);return{flam:!!m[1],h:m[2],acc:!!m[3],d:m[4],gh:!!m[5],grace:m[6]||null,kick:!!m[7]}})}
 function buildLoop(p,groove){
   const g=p.grid,bar=g*4,notes=parseSeq(p.seq),ev=[];let off=0;
   if(groove){const hhE=g===4?2:g===6?3:1;ev.push({s:0,mark:"Groove bar"});
@@ -435,8 +440,9 @@ function openShow(ei,k){
   $("#s-h").textContent=e.rud;$("#showRule").textContent=`Rule ${p.rule}: ${RULES[p.rule-1]}`;
   $("#showVars").innerHTML=e.play.length>1?e.play.map((q,j)=>`<button class="btn mini" type="button" data-show="${ei}:${j}" aria-pressed="${j===k}">Rule ${q.rule}: ${esc(RULES[q.rule-1])}</button>`).join(""):"";
   const notes=parseSeq(p.seq),grp=p.grid===4?4:p.grid;
-  $("#seqline").innerHTML=notes.map((n,i)=>`<span class="nt${n?(n.acc?" acc":n.gh?" gh":""):" rest"}${i&&i%grp===0?" gap":""}"><b>${n?(n.flam?"<small style='font-size:.6rem'>"+(n.h==="R"?"l":"r")+"</small>":"")+n.h:"·"}</b><small>${n?SHORT[n.d]+(n.kick?"+K":""):""}</small></span>`).join("");
-  $("#showHow").innerHTML=`<b>On the kit:</b> ${esc(e.how)}. Red = accent, grey = ghost note. Kick on every beat underneath.`;
+  $("#seqline").innerHTML=notes.map((n,i)=>`<span class="nt${n?(n.acc?" acc":n.gh?" gh":""):" rest"}${i&&i%grp===0?" gap":""}"><b>${n?(n.flam?"<small style='font-size:.6rem'>"+(n.h==="R"?"l":"r")+"</small>":"")+n.h:"·"}</b><small>${n?(n.h==="K"?"foot":SHORT[n.d]+(n.kick?"+K":"")):""}</small></span>`).join("");
+  const per=p.grid===4?"4th":p.grid===3?"3rd":"6th";
+  $("#showHow").innerHTML=`<b>On the kit:</b> ${esc(e.how)}. Red = accent, grey = ghost note. Kick on every beat, which here is every ${per} note (with each metronome click). The groove bar uses a normal rock beat, kick on 1 and 3.`;
   const nm=esc(VARIANT.includes(e.rud)?"single paradiddle":e.rud.toLowerCase());
   $("#showVid").innerHTML=`🎥 Watch a pro play the ${nm} on YouTube: <a href="${YT(VID[e.rud].demo)}" target="_blank" rel="noopener">slow-fast-slow demo</a> · <a href="${YT(VID[e.rud].lesson)}" target="_blank" rel="noopener">full lesson</a> <small class="sub">(Vic Firth, free)</small>${VARIANT.includes(e.rud)?`<br><small class="sub">The ${esc(e.rud.toLowerCase())} is the single paradiddle started from a different note, so the single paradiddle demo is the one to learn from.</small>`:""}`;
   $("#showPhase").textContent=`Plays at ${bpm} BPM (your metronome tempo), looping until you stop it.`;
