@@ -144,18 +144,31 @@ a.btn{text-decoration:none;display:inline-block}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* ---------- two-mode layout ---------- */
-body{padding-bottom:84px}
+body{padding-bottom:24px}
 .app{max-width:640px;margin:0 auto}
-.tab{display:grid;gap:14px;background:none;border:0;padding:0;border-radius:0}
-.tab[hidden]{display:none}
+.screen{display:grid;gap:14px;background:none;border:0;padding:0;border-radius:0}
+.screen[hidden]{display:none}
+.pick-h{font-size:1.8rem;margin-top:4px}
+.wcards{display:grid;gap:10px}
+.wcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:8px}
+.wcard.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.wcard .wt b{display:block;font:800 1.5rem/1.05 var(--display)}
+.wcard .ready{margin:0;font-size:.85rem;color:var(--muted)}
+.wcard a.chip{text-decoration:none;color:var(--ink)}
+.wcard .btn.primary{justify-self:start;padding:11px 18px;font-size:1rem}
+.links{justify-content:center}
+.weekbar{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px 14px;color:var(--ink);font:inherit;cursor:pointer}
+.weekbar b{display:block;font:800 1.35rem/1.05 var(--display)}
+.weekbar .lbl{color:var(--accent)}
+.weekbar .chev{font-size:.85rem;color:var(--muted);white-space:nowrap}
+.tip{display:grid;gap:8px;background:#fff7e0;color:#4a3a00;border:1px solid #e6c65a;border-radius:12px;padding:10px 14px;font-size:.92rem}
+.tip[hidden]{display:none}
+.tip p{margin:0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tip{background:#2e2610;color:#f3e3b0;border-color:#7a6420}}
+:root[data-theme="dark"] .tip{background:#2e2610;color:#f3e3b0;border-color:#7a6420}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
 .top h1{font-size:2.2rem}
-.strip{display:grid;gap:4px;justify-items:end;background:none;border:0;color:var(--muted);font:600 .75rem var(--body);cursor:pointer;padding:0;text-align:right}
-.segs{display:flex;gap:3px}
-.segs i{width:22px;height:6px;border-radius:3px;background:var(--line)}
-.segs i.done{background:var(--ok)}
-.segs i.now{background:var(--accent)}
 .today .focusline{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .today .focusline b{display:block;font-family:var(--display);font-size:1.7rem;font-weight:800;line-height:1.05}
 .today .focusline span{color:var(--muted);font-size:.95rem}
@@ -167,19 +180,12 @@ body{padding-bottom:84px}
 .gatecard{border-left:3px solid var(--brass)}
 .gatecard p{margin:0}
 .gaterow{display:grid;gap:10px;justify-items:start}
-h2.tabh{font-size:1.6rem}
 .opts{display:grid;gap:6px}
 .opt{display:grid;gap:2px;text-align:left;border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;cursor:pointer}
 .opt span{color:var(--muted);font-size:.85rem}
 .opt[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .opt[aria-pressed="true"] b{color:var(--accent)}
 .guide{margin:0;padding-left:20px;display:grid;gap:8px}
-/* bottom tabs */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
-.tabs[hidden]{display:none}
-.tabs button{flex:1;background:none;border:0;color:var(--muted);font:600 .82rem var(--body);padding:8px 4px;border-radius:9px;cursor:pointer;display:grid;gap:2px;justify-items:center}
-.tabs button span{font-size:1.2rem}
-.tabs button[aria-current="page"]{color:var(--accent);background:var(--surface2)}
 .bar[hidden]{display:none}
 /* practice mode */
 .practice{position:fixed;inset:0;z-index:15;background:var(--bg);overflow-y:auto;padding:14px 16px 96px}
@@ -252,11 +258,16 @@ body{margin:0}
 <body>
 
 <div class="app">
-<section class="tab" data-tab="today">
-  <header class="top">
-    <div><span class="lbl">A free 8-week rudiment roadmap</span><h1>Around the Kit</h1></div>
-    <button class="strip" id="strip" type="button" data-go="learn" aria-label="See the roadmap"></button>
-  </header>
+<section class="screen" id="pickScreen" hidden>
+  <header><span class="lbl">A free 8-week rudiment roadmap</span><h1>Around the Kit</h1></header>
+  <div><h2 class="pick-h">Where are you?</h2><p class="sub" style="margin:2px 0 0">Pick your two weeks. You can change any time.</p></div>
+  <div class="wcards" id="wcards"></div>
+  <div class="row links"><button class="btn mini" type="button" data-learn>📘 Rules and how it works</button><button class="btn mini" type="button" data-prog>📈 Progress</button></div>
+</section>
+
+<section class="screen" id="todayScreen" hidden>
+  <button class="weekbar" type="button" id="weekBar" aria-label="Change weeks"></button>
+  <div class="tip" id="tip" hidden role="note"></div>
   <div class="card today">
     <span class="lbl">Today</span>
     <div class="focusline"><div><b id="tRud"></b><span id="tRule"></span></div><button class="btn mini" type="button" id="focusBtn">Change</button></div>
@@ -265,35 +276,35 @@ body{margin:0}
     <ol class="plan" id="planList"></ol>
   </div>
   <div class="card gatecard">
-    <span class="lbl">Gate to move on</span>
-    <div class="gaterow"><p id="gateTxt"></p><div class="row"><button class="btn mini" type="button" data-gate="back">◂ Back a block</button><button class="btn mini" type="button" data-gate="next">Next block ▸</button></div></div>
+    <span class="lbl">Ready for the next weeks when</span>
+    <p id="gateTxt"></p>
   </div>
-  <p class="msg" id="syncMsg" style="text-align:center">Loading your progress…</p>
+  <div class="row links"><button class="btn mini" type="button" data-learn>📘 Exercises and rules</button><button class="btn mini" type="button" data-prog>📈 Progress</button></div>
 </section>
+<p class="msg" id="syncMsg" style="text-align:center">Loading your progress…</p>
 
-<section class="tab" data-tab="progress" hidden>
-  <div class="top"><h2 class="tabh">Progress</h2><button class="btn primary" type="button" id="logOpen">+ Log a session</button></div>
-  <div class="card"><div class="chart" id="chart"></div><div class="tbl" id="history"></div></div>
-</section>
+</div>
 
-<section class="tab" data-tab="learn" hidden>
-  <h2 class="tabh">Learn</h2>
-  <div class="card"><span class="lbl">The 8 weeks</span><div class="rail" id="rail"></div><div class="row"><button class="btn mini" type="button" data-gate="back">◂ Back a block</button><button class="btn mini" type="button" data-gate="next">Next block ▸</button></div></div>
-  <div class="card" id="thisBlock"></div>
-  <div class="card"><h3>This block's exercises</h3>
+<dialog id="progDlg" aria-labelledby="pr-h"><div class="dlg">
+  <div class="dlg-head"><h2 id="pr-h">Progress</h2><div class="row"><button class="btn primary" type="button" id="logOpen">+ Log</button><button class="btn" type="button" data-close>Close</button></div></div>
+  <div class="chart" id="chart"></div><div class="tbl" id="history"></div>
+</div></dialog>
+
+<dialog id="learnDlg" aria-labelledby="le-h"><div class="dlg">
+  <div class="dlg-head"><h2 id="le-h">Exercises and rules</h2><button class="btn" type="button" data-close>Close</button></div>
+  <div class="card"><h3 id="exHead">This week's exercises</h3>
     <span class="legend"><span><span class="stk"><span class="acc">&gt;R</span></span> accent</span><span><span class="stk"><span class="gh">l</span></span> ghost or grace</span></span>
     <div id="exercises"></div></div>
   <div class="card"><h3>The six orchestration rules</h3><p class="sub" style="margin:0">Numbered easiest to hardest, so the numbers are the learning order.</p><ol class="guide" id="rules"></ol></div>
   <div class="card"><h3>How it works</h3><ol class="guide">
-    <li><b>Pick today's focus</b> on the Today tab: one rudiment and the rule you're on. Stay on a rule until it moves around the kit without the time wobbling, then take the next one. Tap ▶ pad or ▶ kit next to any step to preview it.</li>
+    <li><b>Pick your weeks</b> on the first screen, then today's focus: one rudiment and the rule you're on. Stay on a rule until it moves around the kit without the time wobbling, then take the next one. Tap ▶ pad or ▶ kit next to any step to preview it.</li>
     <li><b>Hit Start.</b> Practice mode shows one block at a time with a big clock. Tap ▶ Play along to follow the pad or kit and the count with the click, drums muted so you hear yourself. It moves on by itself with a chime. 30 min runs blocks 2 to 4 only.</li>
     <li><b>Run the click</b> from the bar at the bottom. Tap the BPM for the tempo ladder: +4 after each clean pass, −10 when it gets tense.</li>
-    <li><b>Log it</b> when the session ends: your top clean BPM and whether the groove + fill landed. Your log and gates are saved in this browser on this device only; nothing is sent anywhere.</li>
-    <li><b>Pass the gate</b> on the Today tab when you meet it, and the next two-week block opens. Taking three weeks is fine.</li>
+    <li><b>Log it</b> when the session ends: your top clean BPM and whether the groove + fill landed. Your weeks and log are saved in this browser on this device only; nothing is sent anywhere.</li>
+    <li><b>Move on</b> when you can do the "Ready when" line: tap the weeks banner at the top and pick the next weeks. Taking three weeks on a block is fine.</li>
   </ol></div>
   <p class="credits">Rudiment videos are Vic Firth's free YouTube lessons by Dr. John Wooton (not affiliated). Orchestration ideas adapted from lessons on <a href="https://mixdownmag.com.au/features/columns/more-paradiddle-applications/" target="_blank" rel="noopener">Mixdown</a> and <a href="https://www.drumeo.com/beat/rudiment-applications/" target="_blank" rel="noopener">Drumeo</a>. Free, no ads, no sign-up.</p>
-</section>
-</div>
+</div></dialog>
 
 <div class="practice" id="practice" hidden aria-label="Practice mode"><div class="p-in">
   <div class="p-top"><span class="lbl" id="pStep">Block 1 of 5</span><button class="btn mini" type="button" id="pEnd">✕ End</button></div>
@@ -305,12 +316,6 @@ body{margin:0}
   <div class="p-ctl"><button class="btn" type="button" id="pPause">❚❚ Pause</button><button class="btn primary" type="button" id="pSkip">Next ▸</button></div>
   <p class="p-next" id="pNext"></p>
 </div></div>
-
-<nav class="tabs" id="tabs" aria-label="Sections">
-  <button type="button" data-go="today" aria-current="page"><span>🥁</span>Today</button>
-  <button type="button" data-go="progress"><span>📈</span>Progress</button>
-  <button type="button" data-go="learn"><span>📘</span>Learn</button>
-</nav>
 
 <dialog id="focusDlg" aria-labelledby="f-h"><div class="dlg">
   <div class="dlg-head"><h2 id="f-h">Today's focus</h2><button class="btn" type="button" data-close>Done</button></div>
@@ -359,9 +364,9 @@ body{margin:0}
 
 <script>
 const BLOCKS=[
-  {weeks:"1-2",fam:"Singles and doubles",rud:["Single stroke","Double stroke"],rules:[1,4],gate:"Groove + fill (3+1) lands on the crash every time at target BPM"},
-  {weeks:"3-4",fam:"Paradiddles",rud:["Single paradiddle","Inward paradiddle","Reverse paradiddle"],rules:[1,2,3],gate:"Same gate, plus 2+2 clean"},
-  {weeks:"5-6",fam:"Rolls",rud:["Six-stroke roll","Five-stroke roll"],rules:[1,2,6],gate:"Same gate, plus 1+1 clean"},
+  {weeks:"1-2",fam:"Singles and doubles",rud:["Single stroke","Double stroke"],rules:[1,4],gate:"Groove + fill (3 bars groove, 1 bar fill) lands on the crash every time at your target speed"},
+  {weeks:"3-4",fam:"Paradiddles",rud:["Single paradiddle","Inward paradiddle","Reverse paradiddle"],rules:[1,2,3],gate:"Groove + fill lands on the crash every time, in 3+1 and in 2+2"},
+  {weeks:"5-6",fam:"Rolls",rud:["Six-stroke roll","Five-stroke roll"],rules:[1,2,6],gate:"Groove + fill lands on the crash every time, in 3+1, 2+2 and 1+1"},
   {weeks:"7-8",fam:"Triplet rudiments",rud:["Double paradiddle","Paradiddle-diddle","Flam accent"],rules:[1,2,4],gate:"5 minutes of free flow without stopping to think about sticking"}
 ];
 const RULES=["Walk the toms","Accents to toms","Accents to cymbals","Right hand travels","Split the kit","Kick the diddles"];
@@ -423,9 +428,9 @@ const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth
 const local={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}}};
 
 /* ---------- shared state (db) ---------- */
-let gates=local.get("atk-gates",[false,false,false,false]),sessions=local.get("atk-sessions",[]);
-if(!Array.isArray(gates)||gates.length!==4)gates=[false,false,false,false];if(!Array.isArray(sessions))sessions=[];
-const curBlock=()=>{const i=gates.findIndex(g=>!g);return i<0?3:i};
+let week=null,sessions=local.get("atk-sessions",[]),loaded=true,screen="today",tipSkip=null;
+const curBlock=()=>week==null?0:week;
+readState(local.get("atk-state",null));if(!Array.isArray(sessions))sessions=[];
 let focusPick=local.get("atk-focus",null);
 // today's rudiment + rule, kept inside the current block
 function getFocus(){const b=BLOCKS[curBlock()],f=focusPick||{};return{b,rud:b.rud.includes(f.rud)?f.rud:b.rud[0],rule:b.rules.includes(f.rule)?f.rule:b.rules[0]}}
@@ -444,35 +449,55 @@ function snareHTML(p){
   for(let k=0;k<notes.length;k+=grp)out.push(`<span class="sg">${notes.slice(k,k+grp).map(one).join(" ")}</span>`);
   return out.join(" &nbsp;");
 }
-function saveGates(next){gates=next;local.set("atk-gates",gates);renderAll()}
+function saveState(){local.set("atk-state",{week})}
+// legacy docs stored gates only: the first unpassed gate is the week
+function readState(d){if(!d)return;if(typeof d.week==="number")week=d.week;else if(Array.isArray(d.gates)&&d.gates.some(Boolean)){const i=d.gates.findIndex(g=>!g);week=i<0?3:i}}
 
-/* ---------- tabs ---------- */
-function go(t){document.querySelectorAll(".tab").forEach(s=>s.hidden=s.dataset.tab!==t);document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===t?"page":"false"));window.scrollTo(0,0)}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b)go(b.dataset.go)});
+/* ---------- screens: week picker (home until a week is chosen) and today ---------- */
+function renderScreens(){
+  const pick=loaded&&(week==null||screen==="pick");
+  $("#pickScreen").hidden=!pick;$("#todayScreen").hidden=!loaded||pick;
+  if(pick)renderPick();
+}
+function renderPick(){
+  $("#wcards").innerHTML=BLOCKS.map((b,i)=>`<div class="wcard${i===week?" now":""}">
+    <div class="wt"><span class="lbl">Weeks ${b.weeks}${i===week?" · you're here":""}</span><b>${esc(b.fam)}</b></div>
+    <div class="row">${b.rud.map(r=>`<a class="chip" href="${YT(VID[r].demo)}" target="_blank" rel="noopener" aria-label="Watch how to play the ${esc(r)}">🎥 ${esc(r)}</a>`).join("")}</div>
+    <p class="ready"><b>Ready for the next weeks when:</b> ${esc(b.gate)}</p>
+    <button class="btn primary" type="button" data-pick="${i}">Practice weeks ${b.weeks} →</button></div>`).join("");
+}
+function pickWeek(k){
+  // skipping past weeks between where you are and the pick gets a gentle tip
+  const skipped=BLOCKS.slice((week==null?-1:week)+1,k).map(x=>x.weeks);tipSkip=skipped.length?skipped:null;
+  week=k;screen="today";saveState();renderAll();window.scrollTo(0,0);
+}
+function renderTip(){
+  const t=$("#tip");if(!tipSkip){t.hidden=true;return}
+  t.innerHTML=`<p>💡 Jumping ahead without learning weeks ${tipSkip.join(" and ")} first may slow your progress. Those rudiments are what these weeks build on.</p><div class="row"><button class="btn mini" type="button" data-tip="back">Start at weeks ${tipSkip[0]}</button><button class="btn mini" type="button" data-tip="ok">Got it</button></div>`;t.hidden=false;
+}
+document.addEventListener("click",e=>{
+  const k=e.target.closest("[data-pick]"),t=e.target.closest("[data-tip]");
+  if(k)pickWeek(+k.dataset.pick);
+  else if(t){const first=BLOCKS.findIndex(x=>x.weeks===tipSkip[0]);tipSkip=null;if(t.dataset.tip==="back"){week=first;saveState();renderAll()}else renderTip()}
+  else if(e.target.closest("[data-learn]")){renderLearn();$("#learnDlg").showModal()}
+  else if(e.target.closest("[data-prog]"))$("#progDlg").showModal();
+});
+$("#weekBar").onclick=()=>{screen="pick";tipSkip=null;renderAll();window.scrollTo(0,0)};
 
 /* ---------- today ---------- */
 function renderToday(){
-  const f=getFocus(),cur=curBlock(),allDone=gates.every(Boolean),p=plan(),total=p.reduce((a,x)=>a+x.min,0);
-  $("#strip").innerHTML=`<span class="segs">${BLOCKS.map((x,i)=>`<i class="${gates[i]?"done":i===cur&&!allDone?"now":""}"></i>`).join("")}</span><span>Weeks ${f.b.weeks} · ${esc(f.b.fam)}</span>`;
+  const f=getFocus(),p=plan(),total=p.reduce((a,x)=>a+x.min,0);
+  $("#weekBar").innerHTML=`<span><span class="lbl">Weeks ${f.b.weeks}</span><b>${esc(f.b.fam)}</b></span><span class="chev">Change weeks ▾</span>`;
   $("#tRud").textContent=f.rud;$("#tRule").textContent=`Rule ${f.rule}: ${RULES[f.rule-1]}`;
   const sm=findShow(f.b,f.rud,f.rule);
   const stepBtn=n=>n===1?`<button class="btn mini step-play" type="button" data-warm aria-label="Preview the warm-up on the pad">▶ pad</button>`:n===2?`<button class="btn mini step-play" type="button" data-snare="${esc(f.rud)}" aria-label="Preview the ${esc(f.rud)} on the pad">▶ pad</button>`:(n===3||n===4)&&sm?`<button class="btn mini step-play" type="button" data-show="${sm}"${n===4?' data-mode="1"':""} aria-label="Preview block ${n} on the kit">▶ kit</button>`:"";
   $("#planList").innerHTML=p.map(x=>`<li><span>${x.n}. ${esc(x.name)}</span><span class="pl-r">${stepBtn(x.n)}<span class="mono">${x.min} min</span></span></li>`).join("");
-  $("#startBtn").textContent=started?`▶ Resume · block ${bi+1} of ${p.length}`:`▶ Start ${total} min`;
+  $("#startBtn").textContent=started?`▶ Keep going · part ${bi+1} of ${p.length}`:`▶ Start practice · ${total} min`;
   $("#restart").hidden=!started;
   $("#lenFull").setAttribute("aria-pressed",!short);$("#lenShort").setAttribute("aria-pressed",short);
-  $("#gateTxt").textContent=allDone?"All four gates passed. Loop back to week 1 with a new rule per rudiment.":f.b.gate;
-  paintGateBtns();
+  $("#gateTxt").textContent=week===3?f.b.gate+". After that, start again at weeks 1-2 with a new rule for each rudiment.":f.b.gate;
+  renderTip();
 }
-// Next block = pass this block's gate; Back a block = un-pass the previous one (or the last, once all four are passed)
-function paintGateBtns(){
-  const cur=curBlock(),allDone=gates.every(Boolean),ok=true;
-  document.querySelectorAll('[data-gate="back"]').forEach(b=>b.disabled=!ok||(cur===0&&!allDone));
-  document.querySelectorAll('[data-gate="next"]').forEach(b=>{b.disabled=!ok||allDone;b.textContent=allDone?"All gates passed":cur<3?`✓ Passed · weeks ${BLOCKS[cur+1].weeks} ▸`:"✓ Passed · finish ▸"});
-}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-gate]");if(!b||b.disabled)return;const cur=curBlock(),allDone=gates.every(Boolean);
-  saveGates(b.dataset.gate==="next"?gates.map((g,i)=>i===cur?true:g):gates.map((g,i)=>i===(allDone?3:cur-1)?false:g))});
-
 /* ---------- focus picker (not during play) ---------- */
 function renderFocusDlg(){
   const f=getFocus();
@@ -484,14 +509,10 @@ document.addEventListener("click",e=>{const r=e.target.closest("[data-focus-rud]
 
 /* ---------- learn ---------- */
 function renderLearn(){
-  const cur=curBlock(),allDone=gates.every(Boolean),b=BLOCKS[cur],f=getFocus();
-  $("#rail").innerHTML=BLOCKS.map((x,i)=>`<div class="stage${gates[i]?" done":""}${i===cur&&!allDone?" now":""}"><span class="lbl">Weeks ${x.weeks}</span><span class="wk">${esc(x.fam)}</span><small>${gates[i]?"✓ Gate passed":i===cur?"In progress":"Up next"}</small></div>`).join("");
-  $("#thisBlock").innerHTML=`<h3>Weeks ${b.weeks}: ${esc(b.fam)}</h3>
-    <div class="row">${b.rud.map(r=>`<span class="pair"><span class="chip${r===f.rud?" now":""}">${esc(r)}</span><a class="btn mini" href="${YT(VID[r].demo)}" target="_blank" rel="noopener" aria-label="Watch a pro play the ${esc(r)} on YouTube">🎥 Watch</a></span>`).join("")}</div>
-    <div class="rulechain"><span class="lbl">Rules in order</span>${b.rules.map((n,k)=>{const sm=showFor(b,n);return `${k?'<span class="arrow">→</span>':""}<span class="pair"><span class="chip${n===f.rule?" now":""}">${n}. ${esc(RULES[n-1])}</span>${sm?`<button class="btn mini" type="button" data-show="${sm}" aria-label="Show rule ${n} on the kit">▶</button>`:""}</span>`}).join("")}</div>`;
+  const b=BLOCKS[curBlock()];$("#exHead").textContent=`Weeks ${b.weeks} exercises`;
   renderExercises();
 }
-function renderAll(){renderToday();renderLearn();renderForm();if($("#focusDlg").open)renderFocusDlg();paintPractice()}
+function renderAll(){renderScreens();renderToday();renderLearn();renderForm();if($("#focusDlg").open)renderFocusDlg();paintPractice()}
 
 /* ---------- practice mode ---------- */
 let short=local.get("atk-short",false),bi=0,left=0,running=false,timer=null,started=false,cueKey="";
@@ -521,8 +542,8 @@ function paintPractice(){
 }
 function run(on){running=on;clearInterval(timer);if(on){timer=setInterval(tick,1000);wake()}paintPractice()}
 function tick(){if(--left<=0){chime();const p=plan();if(bi<p.length-1){setBlock(bi+1)}else{finish();return}}paintPractice()}
-function openPractice(){$("#practice").hidden=false;$("#tabs").hidden=true;$("#bar").hidden=false;document.body.classList.add("practicing")}
-function closePractice(){parkStage();$("#practice").hidden=true;$("#tabs").hidden=false;$("#bar").hidden=true;document.body.classList.remove("practicing");if(metroOn)$("#mToggle").click();renderToday()}
+function openPractice(){$("#practice").hidden=false;$("#bar").hidden=false;document.body.classList.add("practicing")}
+function closePractice(){parkStage();$("#practice").hidden=true;$("#bar").hidden=true;document.body.classList.remove("practicing");if(metroOn)$("#mToggle").click();renderToday()}
 function finish(){run(false);started=false;setBlock(0);closePractice();openLog("Nice work. Log it?")}
 $("#startBtn").onclick=()=>{ensureAudio();if(!started){started=true;setBlock(0)}openPractice();run(true)};
 $("#restart").onclick=()=>{started=false;run(false);setBlock(0);renderToday()};
@@ -565,7 +586,7 @@ $("#logForm").addEventListener("submit",e=>{
   const row={date:today(),block:curBlock()+1,rudiment:$("#fRud").value,rule:+$("#fRule").value,bpm:+$("#fBpm").value||0,fills,notes:$("#fNotes").value.trim(),ts:Date.now()};
   if(!row.bpm){$("#logMsg").textContent="Enter your top clean BPM first.";return}
   sessions=[row,...sessions].slice(0,500);local.set("atk-sessions",sessions);renderProgress();
-  $("#fNotes").value="";$("#logMsg").className="msg ok";$("#logMsg").textContent=`Saved: ${row.rudiment} at ${row.bpm} BPM.`;setTimeout(()=>{$("#logDlg").close();go("progress")},900);
+  $("#fNotes").value="";$("#logMsg").className="msg ok";$("#logMsg").textContent=`Saved: ${row.rudiment} at ${row.bpm} BPM.`;setTimeout(()=>{$("#logDlg").close();$("#progDlg").open||$("#progDlg").showModal()},900);
 });
 
 /* ---------- progress ---------- */
@@ -732,7 +753,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-show]");if
 
 /* ---------- boot ---------- */
 setBpm(bpm);setBlock(0);renderAll();renderProgress();
-$("#syncMsg").textContent="Saved in this browser only.";
+$("#syncMsg").textContent="Saved in this browser only.";renderAll();
 </script>
 </body>
 </html>
