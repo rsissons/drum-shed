@@ -266,7 +266,7 @@ body{margin:0}
   </div>
   <div class="card gatecard">
     <span class="lbl">Gate to move on</span>
-    <div class="gaterow"><p id="gateTxt"></p><button class="btn mini" type="button" id="gateBtn">✓ Passed</button></div>
+    <div class="gaterow"><p id="gateTxt"></p><div class="row"><button class="btn mini" type="button" data-gate="back">◂ Back a block</button><button class="btn mini" type="button" data-gate="next">Next block ▸</button></div></div>
   </div>
   <p class="msg" id="syncMsg" style="text-align:center">Loading your progress…</p>
 </section>
@@ -278,7 +278,7 @@ body{margin:0}
 
 <section class="tab" data-tab="learn" hidden>
   <h2 class="tabh">Learn</h2>
-  <div class="card"><span class="lbl">The 8 weeks</span><div class="rail" id="rail"></div><div class="row"><button class="btn mini" type="button" id="gateBack">Back a block</button></div></div>
+  <div class="card"><span class="lbl">The 8 weeks</span><div class="rail" id="rail"></div><div class="row"><button class="btn mini" type="button" data-gate="back">◂ Back a block</button><button class="btn mini" type="button" data-gate="next">Next block ▸</button></div></div>
   <div class="card" id="thisBlock"></div>
   <div class="card"><h3>This block's exercises</h3>
     <span class="legend"><span><span class="stk"><span class="acc">&gt;R</span></span> accent</span><span><span class="stk"><span class="gh">l</span></span> ghost or grace</span></span>
@@ -462,11 +462,16 @@ function renderToday(){
   $("#restart").hidden=!started;
   $("#lenFull").setAttribute("aria-pressed",!short);$("#lenShort").setAttribute("aria-pressed",short);
   $("#gateTxt").textContent=allDone?"All four gates passed. Loop back to week 1 with a new rule per rudiment.":f.b.gate;
-  $("#gateBtn").hidden=allDone;$("#gateBtn").disabled=false;
-  $("#gateBtn").textContent=cur<3?`✓ Passed, start weeks ${BLOCKS[cur+1].weeks}`:"✓ Passed";
+  paintGateBtns();
 }
-$("#gateBtn").onclick=()=>{const cur=curBlock();saveGates(gates.map((g,i)=>i===cur?true:g))};
-$("#gateBack").onclick=()=>{const cur=curBlock();if(cur>0)saveGates(gates.map((g,i)=>i===cur-1?false:g))};
+// Next block = pass this block's gate; Back a block = un-pass the previous one (or the last, once all four are passed)
+function paintGateBtns(){
+  const cur=curBlock(),allDone=gates.every(Boolean),ok=true;
+  document.querySelectorAll('[data-gate="back"]').forEach(b=>b.disabled=!ok||(cur===0&&!allDone));
+  document.querySelectorAll('[data-gate="next"]').forEach(b=>{b.disabled=!ok||allDone;b.textContent=allDone?"All gates passed":cur<3?`✓ Passed · weeks ${BLOCKS[cur+1].weeks} ▸`:"✓ Passed · finish ▸"});
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-gate]");if(!b||b.disabled)return;const cur=curBlock(),allDone=gates.every(Boolean);
+  saveGates(b.dataset.gate==="next"?gates.map((g,i)=>i===cur?true:g):gates.map((g,i)=>i===(allDone?3:cur-1)?false:g))});
 
 /* ---------- focus picker (not during play) ---------- */
 function renderFocusDlg(){
@@ -481,7 +486,6 @@ document.addEventListener("click",e=>{const r=e.target.closest("[data-focus-rud]
 function renderLearn(){
   const cur=curBlock(),allDone=gates.every(Boolean),b=BLOCKS[cur],f=getFocus();
   $("#rail").innerHTML=BLOCKS.map((x,i)=>`<div class="stage${gates[i]?" done":""}${i===cur&&!allDone?" now":""}"><span class="lbl">Weeks ${x.weeks}</span><span class="wk">${esc(x.fam)}</span><small>${gates[i]?"✓ Gate passed":i===cur?"In progress":"Up next"}</small></div>`).join("");
-  $("#gateBack").disabled=cur===0;
   $("#thisBlock").innerHTML=`<h3>Weeks ${b.weeks}: ${esc(b.fam)}</h3>
     <div class="row">${b.rud.map(r=>`<span class="pair"><span class="chip${r===f.rud?" now":""}">${esc(r)}</span><a class="btn mini" href="${YT(VID[r].demo)}" target="_blank" rel="noopener" aria-label="Watch a pro play the ${esc(r)} on YouTube">🎥 Watch</a></span>`).join("")}</div>
     <div class="rulechain"><span class="lbl">Rules in order</span>${b.rules.map((n,k)=>{const sm=showFor(b,n);return `${k?'<span class="arrow">→</span>':""}<span class="pair"><span class="chip${n===f.rule?" now":""}">${n}. ${esc(RULES[n-1])}</span>${sm?`<button class="btn mini" type="button" data-show="${sm}" aria-label="Show rule ${n} on the kit">▶</button>`:""}</span>`}).join("")}</div>`;
