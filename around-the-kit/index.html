@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Around the Kit</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%A5%81%3C/text%3E%3C/svg%3E">
+<meta name="description" content="A free 8-week plan for beginner drummers: take one rudiment a week from the practice pad to fills around the whole kit. Session timer, metronome, an animated kit that plays every exercise, and a practice log.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#eceef0;--surface:#ffffff;--surface2:#f4f5f7;--ink:#17191c;--muted:#5d6470;--line:#d5d9de;
+  --accent:#b8321f;--accent-ink:#ffffff;--brass:#9a7212;--ok:#2f7d4f;--okbg:#e3f1e8;
+  --display:"Saira Condensed","Arial Narrow",Impact,sans-serif;--body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#121416;--surface:#1b1e22;--surface2:#22262b;--ink:#eceef0;--muted:#9aa3ad;--line:#2f343a;
+  --accent:#e2553f;--accent-ink:#140806;--brass:#d4a640;--ok:#56b880;--okbg:#17301f}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#121416;--surface:#1b1e22;--surface2:#22262b;--ink:#eceef0;--muted:#9aa3ad;--line:#2f343a;
+  --accent:#e2553f;--accent-ink:#140806;--brass:#d4a640;--ok:#56b880;--okbg:#17301f}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);padding-inline:16px;padding-block:18px 48px}
+.wrap{max-width:860px;margin:0 auto;display:grid;gap:18px}
+h1,h2,h3{font-family:var(--display);letter-spacing:.01em;line-height:1.05;text-wrap:balance;margin:0}
+h1{font-size:2.6rem;font-weight:800}
+h2{font-size:1.45rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+h3{font-size:1.1rem;font-weight:600}
+.sub{color:var(--muted);margin:4px 0 0}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+section{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:600 .92rem var(--body);border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:9px;padding:9px 14px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.btn[disabled]{opacity:.5;cursor:default}
+.mono{font-family:var(--mono)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.82rem;background:var(--surface2)}
+.chip.now{border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip.done{border-color:var(--ok);color:var(--ok);background:var(--okbg)}
+/* the roadmap rail */
+.rail{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stage{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface2);display:grid;gap:4px;min-width:0}
+.stage .wk{font-family:var(--display);font-size:1.15rem;font-weight:800}
+.stage.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.stage.done{opacity:.75}
+.stage small{color:var(--muted);font-size:.78rem}
+@media (max-width:620px){.rail{grid-template-columns:repeat(2,1fr)}}
+.gate{border-left:3px solid var(--brass);padding:6px 12px;background:var(--surface2);border-radius:0 8px 8px 0}
+/* session blocks */
+.blocks{display:grid;gap:6px}
+.blk{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.blk .n{font-family:var(--display);font-size:1.4rem;font-weight:800;color:var(--muted);text-align:center}
+.blk.on{border-color:var(--accent)}
+.blk.on .n{color:var(--accent)}
+.blk.skip{opacity:.4}
+.blk .t{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1rem}
+.blk p{margin:0;font-size:.85rem;color:var(--muted)}
+.clock{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:2.2rem;font-weight:600}
+/* metronome */
+.metro{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.bpm{font-family:var(--display);font-size:3.4rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;min-width:3.2ch;text-align:center}
+.bpm small{display:block;font-family:var(--body);font-size:.7rem;font-weight:600;letter-spacing:.1em;color:var(--muted)}
+.beats{display:flex;gap:6px}
+.beat{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.beat.hit{background:var(--accent)}
+/* log form */
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+form .full{grid-column:1/-1}
+label{display:grid;gap:4px;font-size:.85rem;font-weight:500}
+select,input,textarea{font:inherit;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{min-height:60px;resize:vertical}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--surface2);color:var(--ink);padding:8px 14px;font:600 .88rem var(--body);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.msg{font-size:.85rem;color:var(--muted);min-height:1.3em}
+.msg.ok{color:var(--ok)}
+@media (max-width:520px){form{grid-template-columns:1fr}}
+/* tables */
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.stk{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.stk .acc{color:var(--accent)}
+.stk .gh{color:var(--muted);font-weight:500}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.empty{color:var(--muted);font-size:.9rem;padding:8px 0}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);width:min(680px,calc(100% - 24px));max-height:calc(100% - 40px);padding:0}
+dialog::backdrop{background:rgba(10,12,14,.55)}
+.dlg{padding:16px;display:grid;gap:12px}
+.dlg-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dlg ol{margin:0;padding-left:20px;display:grid;gap:8px}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 18px rgba(0,0,0,.12)}
+.bar-in{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:8px}
+.bar .now{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);padding:0;cursor:pointer}
+.bar .now b{display:block;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1.15rem}
+.bar .now span{display:block;font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .step{width:40px;height:40px;padding:0;font-size:1.2rem}
+.bar .bpmbtn{min-width:76px;height:40px;padding:0 10px;font-family:var(--display);font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums}
+.bar .bpmbtn small{font-family:var(--body);font-size:.6rem;font-weight:600;letter-spacing:.08em;color:var(--muted);margin-left:3px}
+.bar .play{height:40px;min-width:76px}
+.bar .dot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none}
+.bar .dot.hit{background:var(--accent)}
+.bar .now{min-width:62px}
+@media (max-width:440px){.bar .dot{display:none}.bar-in{gap:6px}.bar .bpmbtn{min-width:64px}}
+body{padding-bottom:96px}
+.rulechain{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rulechain .arrow{color:var(--muted)}
+.btn.mini{padding:4px 9px;font-size:.78rem;white-space:nowrap}
+.btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.btn.primary[aria-pressed]{color:var(--accent-ink)}
+.vid{text-decoration:none;margin-left:4px}
+#kit{width:100%;max-width:440px;margin:0 auto;display:block}
+.kd .body{fill:var(--surface2);stroke:var(--line);stroke-width:2}
+.kd.cym .body{stroke:var(--brass);stroke-dasharray:3 3}
+.kd .glow{fill:var(--accent);opacity:0;transition:opacity .28s}
+.kd.hit .glow{opacity:var(--hit,1);transition:none}
+.kd .nm{font:600 9px var(--body);fill:var(--muted);text-anchor:middle;text-transform:uppercase;letter-spacing:.06em}
+.kd .hd{font:800 17px var(--display);fill:var(--ink);text-anchor:middle}
+.seqline{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.nt{display:grid;place-items:center;min-width:30px;padding:3px 4px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);line-height:1.1}
+.nt b{font:600 .95rem var(--mono)}
+.nt small{font-size:.6rem;color:var(--muted);text-transform:uppercase}
+.nt.acc b{color:var(--accent);font-weight:800}
+.nt.gh b{color:var(--muted);font-weight:500}
+.nt.rest b{color:var(--line)}
+.nt.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.nt.gap{margin-left:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+body{margin:0}
+footer{max-width:860px;margin:0 auto;color:var(--muted);font-size:.8rem;padding:8px 0 0}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="lbl">A free 8-week rudiment roadmap</span>
+    <h1>Around the Kit</h1>
+    <p class="sub">One rudiment of the week, five stages, one variable at a time, until it comes out as a fill without thinking.</p>
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" data-open="guideDlg">❓ How to use</button><button class="btn" type="button" data-open="exDlg">📋 Exercises</button></div>
+  </header>
+
+  <section id="roadmap" aria-labelledby="h-road">
+    <div class="row" style="justify-content:space-between"><h2 id="h-road">Where you are</h2><span class="msg" id="syncMsg">Loading your progress…</span></div>
+    <div class="rail" id="rail"></div>
+    <div id="current"></div>
+  </section>
+
+  <section aria-labelledby="h-sess">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="h-sess">Today's session</h2>
+      <div class="seg" role="group" aria-label="Session length"><button type="button" id="lenFull" aria-pressed="true">40 min</button><button type="button" id="lenShort" aria-pressed="false">30 min</button></div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <div><span class="lbl" id="clockLbl">Block 1 · Pad warm-up</span><div class="clock" id="clock">5:00</div></div>
+      <div class="row"><button class="btn primary" type="button" id="tStart">Start</button><button class="btn" type="button" id="tNext">Next block</button><button class="btn" type="button" id="tReset">Reset</button></div>
+    </div>
+    <div class="blocks" id="blocks"></div>
+  </section>
+
+
+  <section aria-labelledby="h-log">
+    <h2 id="h-log">Log this session</h2>
+    <form id="logForm">
+      <label>Rudiment<select id="fRud"></select></label>
+      <label>Rule<select id="fRule"></select></label>
+      <label>Top clean BPM<input id="fBpm" type="number" inputmode="numeric" min="30" max="260" value="60"></label>
+      <div style="display:grid;gap:4px"><span style="font-size:.85rem;font-weight:500">Groove + fill landed on the crash?</span><div class="seg" role="group" aria-label="Fills landed"><button type="button" id="fYes" aria-pressed="true">Yes, clean</button><button type="button" id="fNo" aria-pressed="false">Not yet</button></div></div>
+      <label class="full">Notes<textarea id="fNotes" placeholder="What felt shaky, what clicked"></textarea></label>
+      <div class="full row"><button class="btn primary" type="submit" id="fSave">Save session</button><span class="msg" id="logMsg"></span></div>
+    </form>
+  </section>
+
+  <section aria-labelledby="h-prog">
+    <h2 id="h-prog">Progress</h2>
+    <div class="chart" id="chart"></div>
+    <div class="tbl" id="history"></div>
+  </section>
+
+  <footer>Rudiment videos are Vic Firth's free YouTube lessons by Dr. John Wooton (not affiliated). Orchestration ideas adapted from lessons on <a href="https://mixdownmag.com.au/features/columns/more-paradiddle-applications/" target="_blank" rel="noopener">Mixdown</a> and <a href="https://www.drumeo.com/beat/rudiment-applications/" target="_blank" rel="noopener">Drumeo</a>. Free, no ads, no sign-up.</footer>
+</div>
+
+<dialog id="guideDlg" aria-labelledby="g-h"><div class="dlg">
+  <div class="dlg-head"><h2 id="g-h">How to use it</h2><button class="btn" type="button" data-close>Close</button></div>
+  <ol>
+    <li><b>Check where you are.</b> The roadmap shows this block's rudiments and the order to work the rules in. Stay on the first rule until it moves around the kit without the time wobbling, then move to the next.</li>
+    <li><b>Start the session timer.</b> It runs all five blocks back to back and chimes when each one ends. Pick 30 min on short days; it runs blocks 2 to 4 only.</li>
+    <li><b>Run the click from the bar at the bottom.</b> Tap ▶ to start or stop, − and + to step the tempo. Tap the BPM for the tempo ladder: speed up 4 BPM after each clean pass, drop back 10 when it gets tense. Your fastest clean tempo is the number you log.</li>
+    <li><b>Log the session when you finish.</b> Save your top clean BPM and whether the groove + fill landed. Your log and gates are saved in this browser on this device only; nothing is sent anywhere.</li>
+    <li><b>Pass the gate, move on.</b> When you meet the gate, tap "Gate passed" and the next two-week block opens. Taking three weeks on a block is fine.</li>
+    <li><b>Need the stickings?</b> Tap 📋 Exercises for this block's patterns and the six orchestration rules. Tap ▶ next to any exercise to hear it and watch it move around a kit at your tempo, and 🎥 for a pro demo of the rudiment itself.</li>
+  </ol>
+  <p class="sub" style="margin:0">Rules are numbered easiest to hardest, so the numbers are the learning order. Each block uses a few of them, low to high.</p>
+</div></dialog>
+
+<dialog id="exDlg" aria-labelledby="h-ex"><div class="dlg">
+  <div class="dlg-head"><h2 id="h-ex">This block's exercises</h2><button class="btn" type="button" data-close>Close</button></div>
+  <span class="legend"><span><span class="stk"><span class="acc">&gt;R</span></span> accent</span><span><span class="stk"><span class="gh">l</span></span> ghost or grace</span></span>
+  <div class="tbl" id="exercises"></div>
+  <h3>The six orchestration rules</h3><ol id="rules"></ol>
+</div></dialog>
+
+<dialog id="showDlg" aria-labelledby="s-h"><div class="dlg">
+  <div class="dlg-head"><div><span class="lbl" id="showRule"></span><h2 id="s-h">Show me</h2></div><button class="btn" type="button" data-close>Close</button></div>
+  <div class="row" id="showVars"></div>
+  <svg id="kit" viewBox="0 0 320 218" role="img" aria-label="Drum kit seen from above. Each drum lights up as it is hit."></svg>
+  <div class="seqline" id="seqline"></div>
+  <div class="row" style="justify-content:center"><button class="btn primary" type="button" id="showPlay">▶ Play</button><button class="btn" type="button" id="showHalf" aria-pressed="false">½ speed</button><button class="btn" type="button" id="showGroove" aria-pressed="true">Groove bar first</button></div>
+  <p class="sub" style="margin:0;text-align:center" id="showPhase">Plays at your metronome tempo, looping until you stop it.</p>
+  <p style="margin:0" id="showHow"></p>
+  <p style="margin:0" id="showVid"></p>
+</div></dialog>
+
+<dialog id="metroDlg" aria-labelledby="m-h"><div class="dlg">
+  <div class="dlg-head"><h2 id="m-h">Tempo ladder: speed up step by step</h2><button class="btn" type="button" data-close>Done</button></div>
+  <div class="row" style="justify-content:center"><div class="bpm"><span id="bpm">60</span><small>BPM</small></div></div>
+  <div class="row" style="justify-content:center"><button class="btn" type="button" data-step="-10">−10 tense</button><button class="btn" type="button" data-step="-4">−4</button><button class="btn" type="button" data-step="4">+4 clean pass</button><button class="btn" type="button" data-step="10">+10</button></div>
+  <label style="max-width:200px;margin:0 auto;width:100%">Set a tempo<input id="bpmIn" type="number" inputmode="numeric" min="30" max="260" value="60"></label>
+  <p class="sub" style="margin:0;text-align:center">Start at a tempo where it's perfect. Each time you play it clean, tap +4. When it gets tense or sloppy, tap −10 and climb again. The fastest tempo you played clean is today's number, and it fills into the log. Beat 1 clicks higher.</p>
+</div></dialog>
+
+<div class="bar" role="region" aria-label="Practice bar"><div class="bar-in">
+  <button type="button" class="now" id="barNow"><b id="barClock">5:00</b><span id="barLbl">Block 1 · Pad warm-up</span></button>
+  <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  <button class="btn step" type="button" data-step="-4" aria-label="Slower by 4">−</button>
+  <button class="btn bpmbtn" type="button" id="bpmBtn" aria-label="Tempo settings"><span id="bpmBar">60</span><small>BPM</small></button>
+  <button class="btn step" type="button" data-step="4" aria-label="Faster by 4">+</button>
+  <button class="btn primary play" type="button" id="mToggle">▶ Click</button>
+</div></div>
+
+<script>
+const BLOCKS=[
+  {weeks:"1-2",fam:"Singles and doubles",rud:["Single stroke","Double stroke"],rules:[1,4],gate:"Groove + fill (3+1) lands on the crash every time at target BPM"},
+  {weeks:"3-4",fam:"Paradiddles",rud:["Single paradiddle","Inward paradiddle","Reverse paradiddle"],rules:[1,2,3],gate:"Same gate, plus 2+2 clean"},
+  {weeks:"5-6",fam:"Rolls",rud:["Six-stroke roll","Five-stroke roll"],rules:[1,2,6],gate:"Same gate, plus 1+1 clean"},
+  {weeks:"7-8",fam:"Triplet rudiments",rud:["Double paradiddle","Paradiddle-diddle","Flam accent"],rules:[1,2,4],gate:"5 minutes of free flow without stopping to think about sticking"}
+];
+const RULES=["Walk the toms","Accents to toms","Accents to cymbals","Right hand travels","Split the kit","Kick the diddles"];
+const RULE_HOW=["Each group goes on the next drum: snare, tom 1, tom 2, floor tom, crash.","Right-hand accents to the floor tom, left-hand accents to the rack tom, everything else ghosted on snare.","Right accent on ride or crash with a kick under it, left accent on the left crash.","Left hand stays on snare, right hand moves anywhere. Then flip it.","Right hand only on the right-side drums, left hand only on the left side.","Replace one note of each double with the kick for linear fills."];
+const SESSION=[
+  {n:1,name:"Pad warm-up",min:5,what:"Singles, doubles, paradiddles: slow, fast, slow again",done:"Both hands sound identical",short:false},
+  {n:2,name:"Rudiment on snare",min:8,what:"Rudiment of the week with accents and ghost notes. Speed up step by step: +4 BPM after each clean pass, back 10 when it gets tense",done:"Clean at target BPM for 1 minute",short:true},
+  {n:3,name:"Orchestration drill",min:12,what:"This week's rule, 2 bars per variation, kick on quarters underneath",done:"Moves without the time wobbling",short:true},
+  {n:4,name:"Groove + fill",min:10,what:"3 bars groove + 1 bar fill over a drumless track, then 2+2, 1+1",done:"Lands on the crash on beat 1 every time",short:true},
+  {n:5,name:"Free flow",min:5,what:"Improvise with only this rudiment, anywhere on the kit",done:"You stop thinking about sticking",short:false}
+];
+const EXERCISES=[
+  {rud:"Single stroke",stk:"RLRL RLRL RLRL RLRL",how:"4 notes each: snare, tom 1, tom 2, floor tom, then crash + kick on 1",rule:"1",play:[
+    {rule:1,grid:4,seq:"Rsn Lsn Rsn Lsn Rt1 Lt1 Rt1 Lt1 Rt2 Lt2 Rt2 Lt2 Rft Lft Rft Lft"}]},
+  {rud:"Double stroke",stk:"RRLL RRLL RRLL RRLL",how:"One pair per drum walking down the toms; then right hand travels while the left stays on snare",rule:"1, 4",play:[
+    {rule:1,grid:4,seq:"Rsn Rsn Lsn Lsn Rt1 Rt1 Lt1 Lt1 Rt2 Rt2 Lt2 Lt2 Rft Rft Lft Lft"},
+    {rule:4,grid:4,seq:"Rt1 Rt1 Lsn Lsn Rt2 Rt2 Lsn Lsn Rft Rft Lsn Lsn Rrd Rrd Lsn Lsn"}]},
+  {rud:"Single paradiddle",stk:">RLRR >LRLL",how:"R accent on floor tom, L accent on rack tom, rest ghosted",rule:"2",play:[
+    {rule:2,grid:4,seq:"R>ft Lsn. Rsn. Rsn. L>t1 Rsn. Lsn. Lsn. R>ft Lsn. Rsn. Rsn. L>t1 Rsn. Lsn. Lsn."}]},
+  {rud:"Single paradiddle",stk:"RLRR LRLL",how:"One paradiddle per drum: snare, tom 1, tom 2, floor tom",rule:"1",play:[
+    {rule:1,grid:4,seq:"Rsn Lsn Rsn Rsn Lt1 Rt1 Lt1 Lt1 Rt2 Lt2 Rt2 Rt2 Lft Rft Lft Lft"}]},
+  {rud:"Inward paradiddle",stk:">RLL>R >LRR>L",how:"Accents to toms, then to ride or crash with kick",rule:"2, 3",play:[
+    {rule:2,grid:4,seq:"R>ft Lsn. Lsn. R>ft L>t1 Rsn. Rsn. L>t1 R>ft Lsn. Lsn. R>ft L>t1 Rsn. Rsn. L>t1"},
+    {rule:3,grid:4,seq:"R>rd+k Lsn. Lsn. R>rd+k L>cr Rsn. Rsn. L>cr R>rd+k Lsn. Lsn. R>rd+k L>cr Rsn. Rsn. L>cr"}]},
+  {rud:"Reverse paradiddle",stk:"RR>LR LL>RL",how:"Walk the toms one group per drum first, then accents to toms",rule:"1, 2",play:[
+    {rule:1,grid:4,seq:"Rsn Rsn Lsn Rsn Lt1 Lt1 Rt1 Lt1 Rt2 Rt2 Lt2 Rt2 Lft Lft Rft Lft"},
+    {rule:2,grid:4,seq:"Rsn. Rsn. L>t1 Rsn. Lsn. Lsn. R>ft Lsn. Rsn. Rsn. L>t1 Rsn. Lsn. Lsn. R>ft Lsn."}]},
+  {rud:"Six-stroke roll",stk:">R ll rr >L",how:"R accent floor tom, L accent rack tom, doubles on snare",rule:"2",play:[
+    {rule:2,grid:6,seq:"R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1 R>ft Lsn. Lsn. Rsn. Rsn. L>t1"}]},
+  {rud:"Five-stroke roll",stk:"rr ll >R",how:"Move the doubles down the toms, then accent on floor tom + kick",rule:"1, 2",play:[
+    {rule:1,grid:4,seq:"Rsn Rsn Lt1 Lt1 R>t2 - - - Lt2 Lt2 Rft Rft L>cr+k - - -"},
+    {rule:2,grid:4,seq:"Rsn. Rsn. Lsn. Lsn. R>ft+k - - - Lsn. Lsn. Rsn. Rsn. L>t1+k - - -"}]},
+  {rud:"Double paradiddle",stk:">RLRLRR >LRLRLL",how:"Accents on toms; feels like a 6/8 fill (triplets)",rule:"2",play:[
+    {rule:2,grid:3,seq:"R>ft Lsn. Rsn. Lsn. Rsn. Rsn. L>t1 Rsn. Lsn. Rsn. Lsn. Lsn."}]},
+  {rud:"Paradiddle-diddle",stk:"RLRRLL",how:"Walk the toms first, then R lead on floor tom with everything else on snare (triplets)",rule:"1, 4",play:[
+    {rule:1,grid:3,seq:"Rsn Lsn Rsn Rsn Lsn Lsn Rt1 Lt1 Rt1 Rt1 Lt1 Lt1 Rt2 Lt2 Rt2 Rt2 Lt2 Lt2 Rft Lft Rft Rft Lft Lft"},
+    {rule:4,grid:3,seq:"R>ft Lsn Rsn Rsn Lsn Lsn R>ft Lsn Rsn Rsn Lsn Lsn"}]},
+  {rud:"Flam accent",stk:">lR L R >rL R L",how:"Flams on toms, taps on snare (triplets)",rule:"2",play:[
+    {rule:2,grid:3,seq:"fR>ft/t1 Lsn Rsn fL>t1/ft Rsn Lsn fR>ft/t1 Lsn Rsn fL>t1/ft Rsn Lsn"}]}
+];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const local={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}}};
+
+/* ---------- shared state (db) ---------- */
+let gates=local.get("atk-gates",[false,false,false,false]),sessions=local.get("atk-sessions",[]);
+if(!Array.isArray(gates)||gates.length!==4)gates=[false,false,false,false];if(!Array.isArray(sessions))sessions=[];
+const curBlock=()=>{const i=gates.findIndex(g=>!g);return i<0?3:i};
+
+function renderRoadmap(){
+  const cur=curBlock(),allDone=gates.every(Boolean);
+  $("#rail").innerHTML=BLOCKS.map((b,i)=>`<div class="stage${gates[i]?" done":""}${i===cur&&!allDone?" now":""}"><span class="lbl">Weeks ${b.weeks}</span><span class="wk">${esc(b.fam)}</span><small>${gates[i]?"✓ Gate passed":i===cur?"In progress":"Up next"}</small></div>`).join("");
+  const b=BLOCKS[cur];
+  $("#current").innerHTML=allDone?`<p class="gate"><b>All four gates passed.</b> Loop back to week 1 with a new rule per rudiment, or pick rudiments from the Vic Firth 40 you haven't touched.</p>`:
+    `<div class="row">${b.rud.map(r=>`<span class="chip now">${esc(r)}</span>`).join("")}</div>
+     <div class="rulechain"><span class="lbl">Rules in order</span>${b.rules.map((n,k)=>`${k?'<span class="arrow">→</span>':""}<span class="chip">${k?"Then":"Start with"}: ${esc(RULES[n-1])} <small style="color:var(--muted)">(rule ${n})</small></span>`).join("")}<button class="btn" type="button" data-open="exDlg" style="padding:5px 10px;font-size:.82rem">📋 Exercises</button></div>
+     <p class="gate"><span class="lbl">Gate to move on</span><br>${esc(b.gate)}</p>
+     <div class="row"><button class="btn" type="button" id="gateBtn">✓ Gate passed, start ${cur<3?"weeks "+BLOCKS[cur+1].weeks:"the loop"}</button><button class="btn" type="button" id="gateBack"${cur>0?"":" disabled"}>Back a block</button></div>`;
+  const gb=$("#gateBtn");if(gb)gb.onclick=()=>saveGates(gates.map((g,i)=>i===cur?true:g));
+  const bk=$("#gateBack");if(bk)bk.onclick=()=>saveGates(gates.map((g,i)=>i===cur-1?false:g));
+  renderForm();renderExercises();
+}
+function saveGates(next){gates=next;local.set("atk-gates",gates);renderRoadmap()}
+
+/* ---------- session timer ---------- */
+let short=local.get("atk-short",false),bi=0,left=0,running=false,timer=null;
+const plan=()=>SESSION.filter(s=>!short||s.short);
+const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+function setBlock(i){const p=plan();bi=Math.max(0,Math.min(i,p.length-1));left=p[bi].min*60;paint()}
+function paint(){
+  const p=plan(),cur=p[bi];
+  $("#clockLbl").textContent=`Block ${cur.n} · ${cur.name}`;$("#clock").textContent=fmt(left);
+  $("#barLbl").textContent=`${running?"":"Paused · "}Block ${cur.n} · ${cur.name}`;$("#barClock").textContent=fmt(left);
+  $("#blocks").innerHTML=SESSION.map(s=>{const inPlan=!short||s.short,on=inPlan&&s===cur;return `<div class="blk${on?" on":""}${inPlan?"":" skip"}"><span class="n">${s.n}</span><div><h3>${esc(s.name)}</h3><p>${esc(s.what)}. <b>Done when:</b> ${esc(s.done)}.</p></div><span class="t">${s.min} min</span></div>`}).join("");
+  $("#tStart").textContent=running?"Pause":left<cur.min*60?"Resume":"Start";
+  $("#lenFull").setAttribute("aria-pressed",!short);$("#lenShort").setAttribute("aria-pressed",short);
+}
+function tick(){
+  if(--left<=0){chime();const p=plan();if(bi<p.length-1){setBlock(bi+1)}else{running=false;clearInterval(timer);left=0;$("#clockLbl").textContent="Session done. Log it below.";$("#clock").textContent="0:00";$("#tStart").textContent="Start";return}}
+  paint();
+}
+$("#tStart").onclick=()=>{ensureAudio();running=!running;if(running){timer=setInterval(tick,1000);wake()}else clearInterval(timer);paint()};
+$("#tNext").onclick=()=>{setBlock(bi+1)};
+$("#barNow").onclick=()=>document.querySelector('[aria-labelledby="h-sess"]').scrollIntoView({behavior:"smooth",block:"start"});
+document.addEventListener("click",e=>{if(e.target.closest("[data-open]")){$("#"+e.target.closest("[data-open]").dataset.open).showModal()}else if(e.target.closest("[data-close]"))e.target.closest("dialog").close();else if(e.target.tagName==="DIALOG")e.target.close()});
+$("#tReset").onclick=()=>{running=false;clearInterval(timer);setBlock(0)};
+$("#lenFull").onclick=()=>{short=false;local.set("atk-short",false);running=false;clearInterval(timer);setBlock(0)};
+$("#lenShort").onclick=()=>{short=true;local.set("atk-short",true);running=false;clearInterval(timer);setBlock(0)};
+let lock=null;async function wake(){try{lock=await navigator.wakeLock?.request("screen")}catch(_){}}
+
+/* ---------- metronome ---------- */
+let bpm=local.get("atk-bpm",60),ac=null,metroOn=false,nextT=0,beat=0,sched=null;
+function ensureAudio(){try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume()}catch(_){}}
+function click(t,accent){const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=accent?1600:1000;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(accent?.9:.5,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.06)}
+function chime(){if(!ac)return;const t=ac.currentTime;[0,.18].forEach((d,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=i?1320:880;g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.6,t+d+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d+.35);o.connect(g).connect(ac.destination);o.start(t+d);o.stop(t+d+.4)})}
+function scheduler(){while(nextT<ac.currentTime+.12){const b=beat;click(nextT,b===0);const ms=Math.max(0,(nextT-ac.currentTime)*1000);setTimeout(()=>{document.querySelectorAll(".bar .dot").forEach((el,i)=>el.classList.toggle("hit",i===b))},ms);nextT+=60/bpm;beat=(beat+1)%4}}
+function setBpm(v){bpm=Math.max(30,Math.min(260,Math.round(v)||60));local.set("atk-bpm",bpm);$("#bpm").textContent=bpm;$("#bpmBar").textContent=bpm;$("#bpmIn").value=bpm;$("#fBpm").value=bpm}
+$("#bpmIn").addEventListener("change",e=>setBpm(+e.target.value));
+$("#bpmBtn").onclick=()=>$("#metroDlg").showModal();
+document.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>setBpm(bpm+ +b.dataset.step));
+$("#mToggle").onclick=()=>{ensureAudio();if(!ac){$("#mToggle").textContent="No sound here";return}metroOn=!metroOn;if(metroOn){nextT=ac.currentTime+.05;beat=0;sched=setInterval(scheduler,25);wake()}else{clearInterval(sched);document.querySelectorAll(".bar .dot").forEach(el=>el.classList.remove("hit"))}$("#mToggle").textContent=metroOn?"■ Stop":"▶ Click"};
+
+/* ---------- log ---------- */
+let fills=true;
+function renderForm(){
+  const b=BLOCKS[curBlock()],keep=$("#fRud").value,keepRule=$("#fRule").value;
+  const all=[...new Set([...b.rud,...BLOCKS.flatMap(x=>x.rud)])];
+  $("#fRud").innerHTML=all.map(r=>`<option${b.rud.includes(r)?"":" class='other'"}>${esc(r)}</option>`).join("");
+  $("#fRud").value=keep&&all.includes(keep)?keep:b.rud[0];
+  $("#fRule").innerHTML=RULES.map((r,i)=>`<option value="${i+1}">${i+1}. ${esc(r)}</option>`).join("");
+  $("#fRule").value=keepRule||String(b.rules[0]);
+}
+$("#fYes").onclick=()=>{fills=true;$("#fYes").setAttribute("aria-pressed","true");$("#fNo").setAttribute("aria-pressed","false")};
+$("#fNo").onclick=()=>{fills=false;$("#fNo").setAttribute("aria-pressed","true");$("#fYes").setAttribute("aria-pressed","false")};
+$("#logForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const row={date:today(),block:curBlock()+1,rudiment:$("#fRud").value,rule:+$("#fRule").value,bpm:+$("#fBpm").value||0,fills,notes:$("#fNotes").value.trim(),ts:Date.now()};
+  if(!row.bpm){$("#logMsg").textContent="Enter your top clean BPM first.";return}
+  sessions=[row,...sessions].slice(0,500);local.set("atk-sessions",sessions);renderProgress();
+  $("#fNotes").value="";$("#logMsg").className="msg ok";$("#logMsg").textContent=`Saved: ${row.rudiment} at ${row.bpm} BPM.`;
+});
+
+/* ---------- progress ---------- */
+const PALETTE=["var(--accent)","var(--brass)","var(--ok)","#4a78b8","#8a5ab0","#c26a2f"];
+function renderProgress(){
+  if(!sessions.length){$("#chart").innerHTML=`<p class="empty">No sessions logged yet. After each practice, save your top clean BPM above. This chart then shows each rudiment's tempo climbing week by week.</p>`;$("#history").innerHTML="";return}
+  const byR={};sessions.forEach(s=>{(byR[s.rudiment]=byR[s.rudiment]||[]).push(s)});
+  const names=Object.keys(byR),dates=[...new Set(sessions.map(s=>s.date))].sort();
+  const W=640,H=220,L=40,Rp=12,T=14,B=30,lo=Math.min(...sessions.map(s=>s.bpm)),hi=Math.max(...sessions.map(s=>s.bpm));
+  const yMin=Math.max(0,Math.floor((lo-8)/10)*10),yMax=Math.ceil((hi+8)/10)*10;
+  const x=d=>dates.length<2?L+(W-L-Rp)/2:L+(W-L-Rp)*dates.indexOf(d)/(dates.length-1),y=v=>T+(H-T-B)*(1-(v-yMin)/(yMax-yMin||1));
+  const ticks=[];for(let v=yMin;v<=yMax;v+=Math.max(10,Math.round((yMax-yMin)/40)*10))ticks.push(v);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Top clean BPM by session">`;
+  ticks.forEach(v=>svg+=`<line x1="${L}" x2="${W-Rp}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${v}</text>`);
+  const lab=[dates[0],dates[dates.length-1]].filter((d,i,a)=>a.indexOf(d)===i);
+  lab.forEach((d,i)=>svg+=`<text x="${x(d)}" y="${H-8}" text-anchor="${lab.length>1?(i?"end":"start"):"middle"}" font-size="11" fill="var(--muted)">${d.slice(5).replace("-","/")}</text>`);
+  names.forEach((n,i)=>{const pts=byR[n].slice().sort((a,b)=>a.ts-b.ts).map(s=>[x(s.date),y(s.bpm)]),c=PALETTE[i%PALETTE.length];
+    if(pts.length>1)svg+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    pts.forEach((p,k)=>svg+=`<circle cx="${p[0]}" cy="${p[1]}" r="${k===pts.length-1?5:3.5}" fill="${c}"/>`)});
+  svg+=`</svg>`;
+  $("#chart").innerHTML=svg+`<div class="legend">${names.map((n,i)=>`<span><i style="background:${PALETTE[i%PALETTE.length]}"></i>${esc(n)} · best ${Math.max(...byR[n].map(s=>s.bpm))}</span>`).join("")}</div>`;
+  const rows=sessions.slice().sort((a,b)=>b.ts-a.ts).slice(0,30);
+  $("#history").innerHTML=`<table><thead><tr><th>Date</th><th>Rudiment</th><th>Rule</th><th>BPM</th><th>Fills</th><th>Notes</th></tr></thead><tbody>${rows.map(s=>`<tr><td class="num">${esc(s.date)}</td><td>${esc(s.rudiment)}</td><td>${s.rule?esc(s.rule+". "+RULES[s.rule-1]):""}</td><td class="num">${s.bpm}</td><td>${s.fills?"✓ clean":"not yet"}</td><td>${esc(s.notes||"")}</td></tr>`).join("")}</tbody></table>`;
+}
+
+/* ---------- exercises ---------- */
+function stick(s){return s.split(/(\s+)/).map(g=>g.replace(/>([A-Za-z])|([a-z])|([A-Z])/g,(m,a,lo,up)=>a?`<span class="acc">&gt;${a}</span>`:lo?`<span class="gh">${lo}</span>`:up)).join("")}
+function renderExercises(){
+  const b=BLOCKS[curBlock()],rows=EXERCISES.filter(e=>b.rud.includes(e.rud));
+  $("#exercises").innerHTML=`<table><thead><tr><th>Rudiment</th><th>Sticking</th><th>On the kit</th><th>Hear it</th></tr></thead><tbody>${rows.map(e=>{const ei=EXERCISES.indexOf(e);return `<tr><td>${esc(e.rud)}<a class="vid" href="${YT(VID[e.rud].demo)}" target="_blank" rel="noopener" title="Pro demo of the rudiment on YouTube (Vic Firth)" aria-label="Pro demo video of the ${esc(e.rud)}">🎥</a></td><td class="stk">${stick(e.stk)}</td><td>${esc(e.how)}</td><td><div style="display:grid;gap:4px">${e.play.map((p,k)=>`<button class="btn mini" type="button" data-show="${ei}:${k}">▶ Rule ${p.rule}</button>`).join("")}</div></td></tr>`}).join("")}</tbody></table><p class="sub" style="font-size:.82rem">16th notes unless marked triplets; kick on every quarter underneath. ▶ plays it on a kit at your tempo. 🎥 opens a pro demo of the rudiment on snare.</p>`;
+}
+$("#rules").innerHTML=RULES.map((r,i)=>`<li><b>${esc(r)}:</b> ${esc(RULE_HOW[i])}</li>`).join("");
+
+/* ---------- show me: kit player ---------- */
+// Vic Firth's free YouTube videos by Dr. John Wooton: a short slow-fast-slow breakdown and a longer lesson (titles checked 2026-10-06)
+const YT=id=>"https://www.youtube.com/watch?v="+id;
+const PD={demo:"Gswzg_AlSP4",lesson:"vOLzV8dWCgw"};
+const VID={"Single stroke":{demo:"Fj0SeWV5d_c",lesson:"nxM7i_GPars"},"Double stroke":{demo:"EL9dQeofEmY",lesson:"-o5cmboS7BE"},"Single paradiddle":PD,"Inward paradiddle":PD,"Reverse paradiddle":PD,"Six-stroke roll":{demo:"cbZYy-fENFc",lesson:"_hW8rZwtV_8"},"Five-stroke roll":{demo:"GWoix3ZQHz4",lesson:"hpsxXElHieE"},"Double paradiddle":{demo:"f50fPZz7exM",lesson:"lvYCimjEdps"},"Paradiddle-diddle":{demo:"4d1RN8UPxtI",lesson:"gXlB9bBUMK4"},"Flam accent":{demo:"LUXEbV34hAM",lesson:"cnxSzRWg-vo"}};
+const VARIANT=["Inward paradiddle","Reverse paradiddle"];
+const DRUMS={kk:{x:170,y:182,r:30,n:"Kick"},hh:{x:42,y:118,r:27,n:"Hi-hat",c:1},cr:{x:72,y:46,r:34,n:"Crash",c:1},t1:{x:135,y:72,r:26,n:"Tom 1"},t2:{x:200,y:72,r:26,n:"Tom 2"},rd:{x:278,y:58,r:38,n:"Ride",c:1},sn:{x:108,y:150,r:30,n:"Snare"},ft:{x:232,y:152,r:34,n:"Floor"}};
+const SHORT={sn:"SN",t1:"T1",t2:"T2",ft:"FT",rd:"RD",cr:"CR",hh:"HH",kk:"K"};
+$("#kit").innerHTML=Object.entries(DRUMS).map(([k,d])=>`<g class="kd${d.c?" cym":""}" id="k-${k}"><circle class="body" cx="${d.x}" cy="${d.y}" r="${d.r}"/><circle class="glow" cx="${d.x}" cy="${d.y}" r="${d.r}"/><text class="hd" x="${d.x}" y="${d.y+4}"></text><text class="nm" x="${d.x}" y="${d.y+d.r*.62}">${d.n}</text></g>`).join("");
+function parseSeq(seq){return seq.trim().split(/\s+/).map(t=>{if(t==="-")return null;const m=t.match(/^(f?)([RL])(>?)([a-z0-9]{2})(\.?)(?:\/([a-z0-9]{2}))?(\+k)?$/);if(!m||!DRUMS[m[4]])throw new Error("bad note "+t);return{flam:!!m[1],h:m[2],acc:!!m[3],d:m[4],gh:!!m[5],grace:m[6]||null,kick:!!m[7]}})}
+function buildLoop(p,groove){
+  const g=p.grid,bar=g*4,notes=parseSeq(p.seq),ev=[];let off=0;
+  if(groove){const hhE=g===4?2:g===6?3:1;ev.push({s:0,mark:"Groove bar"});
+    for(let i=0;i<bar;i++){if(i%hhE===0)ev.push({s:i,d:i===0?"cr":"hh",v:i===0?.8:i%g===0?.45:.28});if(i===0||i===2*g)ev.push({s:i,d:"kk",v:.9});if(i===g||i===3*g)ev.push({s:i,d:"sn",v:.75})}
+    off=bar}
+  ev.push({s:off,mark:"Fill"});
+  notes.forEach((n,i)=>{const at=off+i;if(i%g===0)ev.push({s:at,d:"kk",v:.6});if(!n)return;
+    ev.push({s:at,d:n.d,v:n.acc?1:n.gh?.2:.55,h:n.h,i});
+    if(n.kick)ev.push({s:at,d:"kk",v:.9});
+    if(n.flam)ev.push({s:at,early:.035,d:n.grace,v:.18,h:n.h==="R"?"L":"R"})});
+  return{ev:ev.sort((a,b)=>a.s-b.s-((a.early||0)-(b.early||0))),len:off+Math.ceil(notes.length/bar)*bar,notes};
+}
+let noiseBuf=null;
+function noise(){if(!noiseBuf){noiseBuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const a=noiseBuf.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}const n=ac.createBufferSource();n.buffer=noiseBuf;return n}
+function env(t,peak,dec){const g=ac.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,peak),t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+dec);return g}
+function tone(t,f0,f1,peak,dec,type){const o=ac.createOscillator();o.type=type||"sine";o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dec);o.connect(env(t,peak,dec)).connect(ac.destination);o.start(t);o.stop(t+dec+.05)}
+function hiss(t,type,freq,peak,dec){const n=noise(),f=ac.createBiquadFilter();f.type=type;f.frequency.value=freq;n.connect(f).connect(env(t,peak,dec)).connect(ac.destination);n.start(t);n.stop(t+dec+.05)}
+const VOICE={kk:(t,v)=>tone(t,140,45,v,.32),sn:(t,v)=>{tone(t,220,170,v*.45,.1,"triangle");hiss(t,"highpass",1500,v*.6,.16)},t1:(t,v)=>tone(t,240,170,v*.9,.3),t2:(t,v)=>tone(t,185,130,v*.9,.34),ft:(t,v)=>tone(t,125,85,v,.42),hh:(t,v)=>hiss(t,"highpass",7500,v*.45,.05),cr:(t,v)=>hiss(t,"highpass",4500,v*.45,1.3),rd:(t,v)=>{hiss(t,"bandpass",6500,v*.35,.7);tone(t,520,500,v*.08,.6,"square")}};
+const lit={};
+function flash(e){
+  const g=document.getElementById("k-"+e.d);if(!g)return;
+  g.style.setProperty("--hit",Math.max(.3,e.v));g.classList.add("hit");if(e.h&&e.d!=="kk")g.querySelector(".hd").textContent=e.h;
+  clearTimeout(lit[e.d]);lit[e.d]=setTimeout(()=>{g.classList.remove("hit");g.querySelector(".hd").textContent=""},110);
+  if(e.i!=null)document.querySelectorAll("#seqline .nt").forEach((el,k)=>el.classList.toggle("on",k===e.i));
+}
+let show={ex:0,k:0,half:false,groove:true,on:false,timer:null};
+function openShow(ei,k){
+  stopShow();show.ex=ei;show.k=k;const e=EXERCISES[ei],p=e.play[k];
+  $("#s-h").textContent=e.rud;$("#showRule").textContent=`Rule ${p.rule}: ${RULES[p.rule-1]}`;
+  $("#showVars").innerHTML=e.play.length>1?e.play.map((q,j)=>`<button class="btn mini" type="button" data-show="${ei}:${j}" aria-pressed="${j===k}">Rule ${q.rule}: ${esc(RULES[q.rule-1])}</button>`).join(""):"";
+  const notes=parseSeq(p.seq),grp=p.grid===4?4:p.grid;
+  $("#seqline").innerHTML=notes.map((n,i)=>`<span class="nt${n?(n.acc?" acc":n.gh?" gh":""):" rest"}${i&&i%grp===0?" gap":""}"><b>${n?(n.flam?"<small style='font-size:.6rem'>"+(n.h==="R"?"l":"r")+"</small>":"")+n.h:"·"}</b><small>${n?SHORT[n.d]+(n.kick?"+K":""):""}</small></span>`).join("");
+  $("#showHow").innerHTML=`<b>On the kit:</b> ${esc(e.how)}. Red = accent, grey = ghost note. Kick on every beat underneath.`;
+  const nm=esc(VARIANT.includes(e.rud)?"single paradiddle":e.rud.toLowerCase());
+  $("#showVid").innerHTML=`🎥 Watch a pro play the ${nm} on YouTube: <a href="${YT(VID[e.rud].demo)}" target="_blank" rel="noopener">slow-fast-slow demo</a> · <a href="${YT(VID[e.rud].lesson)}" target="_blank" rel="noopener">full lesson</a> <small class="sub">(Vic Firth, free)</small>${VARIANT.includes(e.rud)?`<br><small class="sub">The ${esc(e.rud.toLowerCase())} is the single paradiddle started from a different note, so the single paradiddle demo is the one to learn from.</small>`:""}`;
+  $("#showPhase").textContent=`Plays at ${bpm} BPM (your metronome tempo), looping until you stop it.`;
+  if(!$("#showDlg").open)$("#showDlg").showModal();
+}
+function stopShow(){show.on=false;clearInterval(show.timer);$("#showPlay").textContent="▶ Play";document.querySelectorAll(".kd").forEach(g=>{g.classList.remove("hit");g.querySelector(".hd").textContent=""});document.querySelectorAll("#seqline .nt").forEach(el=>el.classList.remove("on"))}
+function playShow(){
+  ensureAudio();if(!ac){$("#showPhase").textContent="This browser can't play sound.";return}
+  if(metroOn)$("#mToggle").click();
+  const p=EXERCISES[show.ex].play[show.k],L=buildLoop(p,show.groove),tempo=show.half?bpm/2:bpm,sd=60/tempo/p.grid;
+  const t0=ac.currentTime+.12;let n=0,j=0;show.on=true;$("#showPlay").textContent="■ Stop";
+  $("#showPhase").textContent=`${Math.round(tempo)} BPM${show.half?" (half speed)":""}`;
+  show.timer=setInterval(()=>{
+    while(true){const e=L.ev[j],t=t0+(n*L.len+e.s)*sd-(e.early||0);if(t>ac.currentTime+.15)break;
+      if(e.mark){const label=e.mark;setTimeout(()=>{if(show.on)$("#showPhase").textContent=`${label} · ${Math.round(tempo)} BPM${show.half?" (half speed)":""}`},Math.max(0,(t-ac.currentTime)*1000))}
+      else{VOICE[e.d](Math.max(t,ac.currentTime),e.v);setTimeout(()=>{if(show.on)flash(e)},Math.max(0,(t-ac.currentTime)*1000))}
+      if(++j>=L.ev.length){j=0;n++}}
+  },25);
+}
+$("#showPlay").onclick=()=>show.on?stopShow():playShow();
+$("#showHalf").onclick=()=>{show.half=!show.half;$("#showHalf").setAttribute("aria-pressed",show.half);if(show.on){stopShow();playShow()}};
+$("#showGroove").onclick=()=>{show.groove=!show.groove;$("#showGroove").setAttribute("aria-pressed",show.groove);if(show.on){stopShow();playShow()}};
+$("#showDlg").addEventListener("close",stopShow);
+document.addEventListener("click",e=>{const b=e.target.closest("[data-show]");if(!b)return;const[ei,k]=b.dataset.show.split(":").map(Number);const was=show.on&&$("#showDlg").open;openShow(ei,k);if(was)playShow()});
+
+/* ---------- boot ---------- */
+setBpm(bpm);setBlock(0);renderRoadmap();renderProgress();
+$("#syncMsg").textContent="Saved in this browser only.";
+</script>
+</body>
+</html>
