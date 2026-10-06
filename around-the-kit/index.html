@@ -112,6 +112,14 @@ body{padding-bottom:96px}
 .rulechain{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .rulechain .arrow{color:var(--muted)}
 .pair{display:inline-flex;align-items:center;gap:4px}
+.focus{display:grid;gap:8px;border:1px solid var(--accent);border-radius:10px;padding:10px 12px;background:var(--surface2)}
+.focus select{width:auto;max-width:100%}
+.blk .extra{grid-column:1/-1;padding:8px 10px;border-radius:8px;background:var(--surface2);display:grid;gap:6px;font-size:.88rem}
+.blk .extra p{color:var(--ink)}
+.stk.big{font-size:1.25rem;letter-spacing:.04em;white-space:normal}
+.stk .gh{font-size:.85em}
+.stk small{font-size:.7em;color:var(--muted)}
+.rulechain .chip.now small{color:inherit!important}
 a.btn{text-decoration:none;display:inline-block}
 .btn.mini{padding:4px 9px;font-size:.78rem;white-space:nowrap}
 .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
@@ -164,6 +172,7 @@ footer a{color:inherit}
       <div><span class="lbl" id="clockLbl">Block 1 · Pad warm-up</span><div class="clock" id="clock">5:00</div></div>
       <div class="row"><button class="btn primary" type="button" id="tStart">Start</button><button class="btn" type="button" id="tNext">Next block</button><button class="btn" type="button" id="tReset">Reset</button></div>
     </div>
+    <div class="focus" id="focus" aria-label="Today's focus"></div>
     <div class="blocks" id="blocks"></div>
   </section>
 
@@ -193,6 +202,7 @@ footer a{color:inherit}
   <div class="dlg-head"><h2 id="g-h">How to use it</h2><button class="btn" type="button" data-close>Close</button></div>
   <ol>
     <li><b>Check where you are.</b> The roadmap shows this block's rudiments and the order to work the rules in. Stay on the first rule until it moves around the kit without the time wobbling, then move to the next.</li>
+    <li><b>Pick today's focus.</b> At the top of Today's session, choose your rudiment and the rule you're on. Block 2 then shows that rudiment's accents and ghost notes, block 3 shows the rule with a ▶ Show me, and the log fills in both.</li>
     <li><b>Start the session timer.</b> It runs all five blocks back to back and chimes when each one ends. Pick 30 min on short days; it runs blocks 2 to 4 only.</li>
     <li><b>Run the click from the bar at the bottom.</b> Tap ▶ to start or stop, − and + to step the tempo. Tap the BPM for the tempo ladder: speed up 4 BPM after each clean pass, drop back 10 when it gets tense. Your fastest clean tempo is the number you log.</li>
     <li><b>Log the session when you finish.</b> Save your top clean BPM and whether the groove + fill landed. Your log and gates are saved in this browser on this device only; nothing is sent anywhere.</li>
@@ -248,8 +258,8 @@ const RULES=["Walk the toms","Accents to toms","Accents to cymbals","Right hand 
 const RULE_HOW=["Each group goes on the next drum: snare, tom 1, tom 2, floor tom, crash.","Right-hand accents to the floor tom, left-hand accents to the rack tom, everything else ghosted on snare.","Right accent on ride or crash with a kick under it, left accent on the left crash.","Left hand stays on snare, right hand moves anywhere. Then flip it.","Right hand only on the right-side drums, left hand only on the left side.","Replace one note of each double with the kick for linear fills."];
 const SESSION=[
   {n:1,name:"Pad warm-up",min:5,what:"Singles, doubles, paradiddles: slow, fast, slow again",done:"Both hands sound identical",short:false},
-  {n:2,name:"Rudiment on snare",min:8,what:"Rudiment of the week with accents and ghost notes. Speed up step by step: +4 BPM after each clean pass, back 10 when it gets tense",done:"Clean at target BPM for 1 minute",short:true},
-  {n:3,name:"Orchestration drill",min:12,what:"This week's rule, 2 bars per variation, kick on quarters underneath",done:"Moves without the time wobbling",short:true},
+  {n:2,name:"Rudiment on snare",min:8,what:"Your focus rudiment with accents and ghost notes (below). Speed up step by step: +4 BPM after each clean pass, back 10 when it gets tense",done:"Clean at target BPM for 1 minute",short:true},
+  {n:3,name:"Orchestration drill",min:12,what:"Your focus rule from above, 2 bars per variation, kick on every beat underneath",done:"Moves without the time wobbling",short:true},
   {n:4,name:"Groove + fill",min:10,what:"3 bars groove + 1 bar fill over a drumless track, then 2+2, 1+1",done:"Lands on the crash on beat 1 every time",short:true},
   {n:5,name:"Free flow",min:5,what:"Improvise with only this rudiment, anywhere on the kit",done:"You stop thinking about sticking",short:false}
 ];
@@ -283,6 +293,20 @@ const EXERCISES=[
   {rud:"Flam accent",stk:">lR L R >rL R L",how:"Flams on toms, taps on snare (triplets)",rule:"2",play:[
     {rule:2,grid:3,seq:"fR>ft/t1 Lsn Rsn fL>t1/ft Rsn Lsn fR>ft/t1 Lsn Rsn fL>t1/ft Rsn Lsn"}]}
 ];
+// block 2 snare drill: R> accent, . ghost, f flam; nokick = pad style, no kick
+const SNARE={
+  "Single stroke":{grid:4,seq:"R>sn Lsn. Rsn. Lsn. R>sn Lsn. Rsn. Lsn. R>sn Lsn. Rsn. Lsn. R>sn Lsn. Rsn. Lsn."},
+  "Double stroke":{grid:4,seq:"R>sn Rsn. Lsn. Lsn. R>sn Rsn. Lsn. Lsn. R>sn Rsn. Lsn. Lsn. R>sn Rsn. Lsn. Lsn."},
+  "Single paradiddle":{grid:4,seq:"R>sn Lsn. Rsn. Rsn. L>sn Rsn. Lsn. Lsn. R>sn Lsn. Rsn. Rsn. L>sn Rsn. Lsn. Lsn."},
+  "Inward paradiddle":{grid:4,seq:"R>sn Lsn. Lsn. R>sn L>sn Rsn. Rsn. L>sn R>sn Lsn. Lsn. R>sn L>sn Rsn. Rsn. L>sn"},
+  "Reverse paradiddle":{grid:4,seq:"Rsn. Rsn. L>sn Rsn. Lsn. Lsn. R>sn Lsn. Rsn. Rsn. L>sn Rsn. Lsn. Lsn. R>sn Lsn."},
+  "Six-stroke roll":{grid:6,seq:"R>sn Lsn. Lsn. Rsn. Rsn. L>sn R>sn Lsn. Lsn. Rsn. Rsn. L>sn R>sn Lsn. Lsn. Rsn. Rsn. L>sn R>sn Lsn. Lsn. Rsn. Rsn. L>sn"},
+  "Five-stroke roll":{grid:4,seq:"Rsn. Rsn. Lsn. Lsn. R>sn - - - Lsn. Lsn. Rsn. Rsn. L>sn - - -"},
+  "Double paradiddle":{grid:3,seq:"R>sn Lsn. Rsn. Lsn. Rsn. Rsn. L>sn Rsn. Lsn. Rsn. Lsn. Lsn."},
+  "Paradiddle-diddle":{grid:3,seq:"R>sn Lsn. Rsn. Rsn. Lsn. Lsn. R>sn Lsn. Rsn. Rsn. Lsn. Lsn."},
+  "Flam accent":{grid:3,seq:"fR>sn/sn Lsn. Rsn. fL>sn/sn Rsn. Lsn. fR>sn/sn Lsn. Rsn. fL>sn/sn Rsn. Lsn."}
+};
+for(const k in SNARE)SNARE[k].nokick=true;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
@@ -292,26 +316,55 @@ const local={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.
 let gates=local.get("atk-gates",[false,false,false,false]),sessions=local.get("atk-sessions",[]);
 if(!Array.isArray(gates)||gates.length!==4)gates=[false,false,false,false];if(!Array.isArray(sessions))sessions=[];
 const curBlock=()=>{const i=gates.findIndex(g=>!g);return i<0?3:i};
+let focusPick=local.get("atk-focus",null);
+// today's rudiment + rule, kept inside the current block
+function getFocus(){const b=BLOCKS[curBlock()],f=focusPick||{};return{b,rud:b.rud.includes(f.rud)?f.rud:b.rud[0],rule:b.rules.includes(f.rule)?f.rule:b.rules[0]}}
+function setFocus(rud,rule){focusPick={rud,rule};local.set("atk-focus",focusPick);$("#fRud").value=rud;$("#fRule").value=String(rule);renderRoadmap();paint()}
+// exercise for this rudiment + rule, else the block's first exercise for the rule
+function findShow(b,rud,rule){const i=EXERCISES.findIndex(e=>e.rud===rud&&e.play.some(q=>q.rule===rule));if(i>=0)return i+":"+EXERCISES[i].play.findIndex(q=>q.rule===rule);return showFor(b,rule)}
+function renderFocus(){
+  const f=getFocus();
+  $("#focus").innerHTML=`<span class="lbl">Today's focus: pick your rudiment and rule</span>
+    <div class="row"><select id="focRud" aria-label="Rudiment">${f.b.rud.map(r=>`<option${r===f.rud?" selected":""}>${esc(r)}</option>`).join("")}</select></div>
+    <div class="row">${f.b.rules.map((n,k)=>`<button class="btn mini" type="button" data-focus-rule="${n}" aria-pressed="${n===f.rule}">${k?"Then":"Start"}: ${n}. ${esc(RULES[n-1])}</button>`).join("")}</div>`;
+  $("#focRud").onchange=e=>setFocus(e.target.value,f.rule);
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-focus-rule]");if(b){const f=getFocus();setFocus(f.rud,+b.dataset.focusRule)}});
+// accent/ghost sticking as text, one repeat only
+function snareHTML(p){
+  const toks=p.seq.trim().split(/\s+/);let per=toks.length;
+  for(let n=1;n<toks.length;n++){if(toks.length%n===0&&toks.every((t,i)=>t===toks[i%n])){per=n;break}}
+  const grp=p.grid===4?4:6;
+  return parseSeq(toks.slice(0,per).join(" ")).map((n,i)=>(i&&i%grp===0?"&nbsp;&nbsp;":"")+(!n?'<span class="gh">·</span>':n.acc?`<span class="acc">&gt;${n.flam?`<small>${n.h==="R"?"l":"r"}</small>`:""}${n.h}</span>`:n.gh?`<span class="gh">${n.h.toLowerCase()}</span>`:n.h)).join(" ");
+}
+function blockExtra(n){
+  const f=getFocus();
+  if(n===2)return `<div class="extra"><div class="row"><span class="stk big">${snareHTML(SNARE[f.rud])}</span><button class="btn mini" type="button" data-snare="${esc(f.rud)}">▶ Hear it on snare</button></div>
+    <p><b style="color:var(--accent)">Big red &gt;R</b> = accent: start the stick high and play it loud. <b style="color:var(--muted)">Small grey r</b> = ghost note: stick about an inch off the head, barely there.</p></div>`;
+  if(n===3){const sm=findShow(f.b,f.rud,f.rule),[ei,k]=sm?sm.split(":").map(Number):[-1,0],e=EXERCISES[ei];
+    return `<div class="extra"><p><b>Rule ${f.rule}: ${esc(RULES[f.rule-1])}.</b> ${esc(RULE_HOW[f.rule-1])}</p>${e?`<div class="row"><p style="flex:1;min-width:180px">${e.rud===f.rud?"On the "+esc(f.rud.toLowerCase()):"Example on the "+esc(e.rud.toLowerCase())}: ${esc(e.how)}.</p><button class="btn mini" type="button" data-show="${sm}">▶ Show me</button></div>`:""}</div>`}
+  return "";
+}
 
 function renderRoadmap(){
   const cur=curBlock(),allDone=gates.every(Boolean);
   $("#rail").innerHTML=BLOCKS.map((b,i)=>`<div class="stage${gates[i]?" done":""}${i===cur&&!allDone?" now":""}"><span class="lbl">Weeks ${b.weeks}</span><span class="wk">${esc(b.fam)}</span><small>${gates[i]?"✓ Gate passed":i===cur?"In progress":"Up next"}</small></div>`).join("");
   const b=BLOCKS[cur];
   $("#current").innerHTML=allDone?`<p class="gate"><b>All four gates passed.</b> Loop back to week 1 with a new rule per rudiment, or pick rudiments from the Vic Firth 40 you haven't touched.</p>`:
-    `<div class="row">${b.rud.map(r=>`<span class="pair"><span class="chip now">${esc(r)}</span><a class="btn mini" href="${YT(VID[r].demo)}" target="_blank" rel="noopener" aria-label="Watch a pro play the ${esc(r)} on YouTube">🎥 Watch</a></span>`).join("")}</div>
-     <div class="rulechain"><span class="lbl">Rules in order</span>${b.rules.map((n,k)=>{const sm=showFor(b,n);return `${k?'<span class="arrow">→</span>':""}<span class="pair"><span class="chip">${k?"Then":"Start with"}: ${esc(RULES[n-1])} <small style="color:var(--muted)">(rule ${n})</small></span>${sm?`<button class="btn mini" type="button" data-show="${sm}" aria-label="Show rule ${n} on the kit">▶ Show me</button>`:""}</span>`}).join("")}<button class="btn" type="button" data-open="exDlg" style="padding:5px 10px;font-size:.82rem">📋 All exercises</button></div>
+    `<div class="row">${b.rud.map(r=>`<span class="pair"><span class="chip${r===getFocus().rud?" now":""}">${esc(r)}</span><a class="btn mini" href="${YT(VID[r].demo)}" target="_blank" rel="noopener" aria-label="Watch a pro play the ${esc(r)} on YouTube">🎥 Watch</a></span>`).join("")}</div>
+     <div class="rulechain"><span class="lbl">Rules in order</span>${b.rules.map((n,k)=>{const sm=showFor(b,n);return `${k?'<span class="arrow">→</span>':""}<span class="pair"><span class="chip${n===getFocus().rule?" now":""}">${k?"Then":"Start with"}: ${esc(RULES[n-1])} <small style="color:var(--muted)">(rule ${n})</small></span>${sm?`<button class="btn mini" type="button" data-show="${sm}" aria-label="Show rule ${n} on the kit">▶ Show me</button>`:""}</span>`}).join("")}<button class="btn" type="button" data-open="exDlg" style="padding:5px 10px;font-size:.82rem">📋 All exercises</button></div>
      <p class="gate"><span class="lbl">Gate to move on</span><br>${esc(b.gate)}</p>
      <div class="row"><button class="btn" type="button" id="gateBtn">✓ Gate passed, start ${cur<3?"weeks "+BLOCKS[cur+1].weeks:"the loop"}</button><button class="btn" type="button" id="gateBack"${cur>0?"":" disabled"}>Back a block</button></div>`;
   const gb=$("#gateBtn");if(gb)gb.onclick=()=>saveGates(gates.map((g,i)=>i===cur?true:g));
   const bk=$("#gateBack");if(bk)bk.onclick=()=>saveGates(gates.map((g,i)=>i===cur-1?false:g));
-  renderForm();renderExercises();
+  renderForm();renderExercises();renderFocus();
 }
 // first exercise in this block that plays rule n, as "exercise:variant"
 function showFor(b,n){for(let i=0;i<EXERCISES.length;i++){const e=EXERCISES[i];if(!b.rud.includes(e.rud))continue;const k=e.play.findIndex(q=>q.rule===n);if(k>=0)return i+":"+k}return null}
 function saveGates(next){gates=next;local.set("atk-gates",gates);renderRoadmap()}
 
 /* ---------- session timer ---------- */
-let short=local.get("atk-short",false),bi=0,left=0,running=false,timer=null;
+let short=local.get("atk-short",false),bi=0,left=0,running=false,timer=null,blocksKey="";
 const plan=()=>SESSION.filter(s=>!short||s.short);
 const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
 function setBlock(i){const p=plan();bi=Math.max(0,Math.min(i,p.length-1));left=p[bi].min*60;paint()}
@@ -319,7 +372,9 @@ function paint(){
   const p=plan(),cur=p[bi];
   $("#clockLbl").textContent=`Block ${cur.n} · ${cur.name}`;$("#clock").textContent=fmt(left);
   $("#barLbl").textContent=`${running?"":"Paused · "}Block ${cur.n} · ${cur.name}`;$("#barClock").textContent=fmt(left);
-  $("#blocks").innerHTML=SESSION.map(s=>{const inPlan=!short||s.short,on=inPlan&&s===cur;return `<div class="blk${on?" on":""}${inPlan?"":" skip"}"><span class="n">${s.n}</span><div><h3>${esc(s.name)}</h3><p>${esc(s.what)}. <b>Done when:</b> ${esc(s.done)}.</p></div><span class="t">${s.min} min</span></div>`}).join("");
+  const f=getFocus(),key=[short,f.rud,f.rule,curBlock()].join("|");
+  if(key!==blocksKey){blocksKey=key;$("#blocks").innerHTML=SESSION.map(s=>`<div class="blk" data-n="${s.n}"><span class="n">${s.n}</span><div><h3>${esc(s.name)}</h3><p>${esc(s.what)}. <b>Done when:</b> ${esc(s.done)}.</p></div><span class="t">${s.min} min</span>${blockExtra(s.n)}</div>`).join("")}
+  document.querySelectorAll("#blocks .blk").forEach(el=>{const s=SESSION[+el.dataset.n-1],inPlan=!short||s.short;el.classList.toggle("on",inPlan&&s===cur);el.classList.toggle("skip",!inPlan)});
   $("#tStart").textContent=running?"Pause":left<cur.min*60?"Resume":"Start";
   $("#lenFull").setAttribute("aria-pressed",!short);$("#lenShort").setAttribute("aria-pressed",short);
 }
@@ -354,9 +409,9 @@ function renderForm(){
   const b=BLOCKS[curBlock()],keep=$("#fRud").value,keepRule=$("#fRule").value;
   const all=[...new Set([...b.rud,...BLOCKS.flatMap(x=>x.rud)])];
   $("#fRud").innerHTML=all.map(r=>`<option${b.rud.includes(r)?"":" class='other'"}>${esc(r)}</option>`).join("");
-  $("#fRud").value=keep&&all.includes(keep)?keep:b.rud[0];
+  $("#fRud").value=keep&&all.includes(keep)?keep:getFocus().rud;
   $("#fRule").innerHTML=RULES.map((r,i)=>`<option value="${i+1}">${i+1}. ${esc(r)}</option>`).join("");
-  $("#fRule").value=keepRule||String(b.rules[0]);
+  $("#fRule").value=keepRule||String(getFocus().rule);
 }
 $("#fYes").onclick=()=>{fills=true;$("#fYes").setAttribute("aria-pressed","true");$("#fNo").setAttribute("aria-pressed","false")};
 $("#fNo").onclick=()=>{fills=false;$("#fNo").setAttribute("aria-pressed","true");$("#fYes").setAttribute("aria-pressed","false")};
@@ -415,7 +470,7 @@ function buildLoop(p,groove){
     for(let i=0;i<bar;i++){if(i%hhE===0)ev.push({s:i,d:i===0?"cr":"hh",v:i===0?.8:i%g===0?.45:.28});if(i===0||i===2*g)ev.push({s:i,d:"kk",v:.9});if(i===g||i===3*g)ev.push({s:i,d:"sn",v:.75})}
     off=bar}
   ev.push({s:off,mark:"Fill"});
-  notes.forEach((n,i)=>{const at=off+i;if(i%g===0)ev.push({s:at,d:"kk",v:.6});if(!n)return;
+  notes.forEach((n,i)=>{const at=off+i;if(i%g===0&&!p.nokick)ev.push({s:at,d:"kk",v:.6});if(!n)return;
     ev.push({s:at,d:n.d,v:n.acc?1:n.gh?.2:.55,h:n.h,i});
     if(n.kick)ev.push({s:at,d:"kk",v:.9});
     if(n.flam)ev.push({s:at,early:.035,d:n.grace,v:.18,h:n.h==="R"?"L":"R"})});
@@ -434,17 +489,29 @@ function flash(e){
   clearTimeout(lit[e.d]);lit[e.d]=setTimeout(()=>{g.classList.remove("hit");g.querySelector(".hd").textContent=""},110);
   if(e.i!=null)document.querySelectorAll("#seqline .nt").forEach((el,k)=>el.classList.toggle("on",k===e.i));
 }
-let show={ex:0,k:0,half:false,groove:true,on:false,timer:null};
+let show={p:null,snare:false,half:false,groove:true,on:false,timer:null};
+function seqChips(p){const notes=parseSeq(p.seq),grp=p.grid===4?4:p.grid;
+  return notes.map((n,i)=>`<span class="nt${n?(n.acc?" acc":n.gh?" gh":""):" rest"}${i&&i%grp===0?" gap":""}"><b>${n?(n.flam?"<small style='font-size:.6rem'>"+(n.h==="R"?"l":"r")+"</small>":"")+(n.gh?n.h.toLowerCase():n.h):"·"}</b><small>${n?(n.h==="K"?"foot":SHORT[n.d]+(n.kick?"+K":"")):""}</small></span>`).join("")}
+function vidHTML(rud){const nm=esc(VARIANT.includes(rud)?"single paradiddle":rud.toLowerCase());
+  return `🎥 Watch a pro play the ${nm} on YouTube: <a href="${YT(VID[rud].demo)}" target="_blank" rel="noopener">slow-fast-slow demo</a> · <a href="${YT(VID[rud].lesson)}" target="_blank" rel="noopener">full lesson</a> <small class="sub">(Vic Firth, free)</small>${VARIANT.includes(rud)?`<br><small class="sub">The ${esc(rud.toLowerCase())} is the single paradiddle started from a different note, so the single paradiddle demo is the one to learn from.</small>`:""}`}
+function openSnare(rud){
+  stopShow();show.p=SNARE[rud];show.snare=true;
+  $("#s-h").textContent=rud+" on snare";$("#showRule").textContent="Block 2 · Rudiment on snare";$("#showVars").innerHTML="";
+  $("#seqline").innerHTML=seqChips(show.p);$("#showGroove").hidden=true;
+  $("#showHow").innerHTML=`<b>Hear the dynamics:</b> red <b style="color:var(--accent)">&gt;R</b> notes are accents, loud with the stick starting high. Grey lowercase notes are ghost notes, barely there with the stick an inch off the head. Snare only, no kick, the way you'd play it on the pad.`;
+  $("#showVid").innerHTML=vidHTML(rud);
+  $("#showPhase").textContent=`Plays at ${bpm} BPM (your metronome tempo), looping until you stop it.`;
+  if(!$("#showDlg").open)$("#showDlg").showModal();
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-snare]");if(b)openSnare(b.dataset.snare)});
 function openShow(ei,k){
-  stopShow();show.ex=ei;show.k=k;const e=EXERCISES[ei],p=e.play[k];
+  stopShow();const e=EXERCISES[ei],p=e.play[k];show.p=p;show.snare=false;$("#showGroove").hidden=false;
   $("#s-h").textContent=e.rud;$("#showRule").textContent=`Rule ${p.rule}: ${RULES[p.rule-1]}`;
   $("#showVars").innerHTML=e.play.length>1?e.play.map((q,j)=>`<button class="btn mini" type="button" data-show="${ei}:${j}" aria-pressed="${j===k}">Rule ${q.rule}: ${esc(RULES[q.rule-1])}</button>`).join(""):"";
-  const notes=parseSeq(p.seq),grp=p.grid===4?4:p.grid;
-  $("#seqline").innerHTML=notes.map((n,i)=>`<span class="nt${n?(n.acc?" acc":n.gh?" gh":""):" rest"}${i&&i%grp===0?" gap":""}"><b>${n?(n.flam?"<small style='font-size:.6rem'>"+(n.h==="R"?"l":"r")+"</small>":"")+n.h:"·"}</b><small>${n?(n.h==="K"?"foot":SHORT[n.d]+(n.kick?"+K":"")):""}</small></span>`).join("");
+  $("#seqline").innerHTML=seqChips(p);
   const per=p.grid===4?"4th":p.grid===3?"3rd":"6th";
   $("#showHow").innerHTML=`<b>On the kit:</b> ${esc(e.how)}. Red = accent, grey = ghost note. Kick on every beat, which here is every ${per} note (with each metronome click). The groove bar uses a normal rock beat, kick on 1 and 3.`;
-  const nm=esc(VARIANT.includes(e.rud)?"single paradiddle":e.rud.toLowerCase());
-  $("#showVid").innerHTML=`🎥 Watch a pro play the ${nm} on YouTube: <a href="${YT(VID[e.rud].demo)}" target="_blank" rel="noopener">slow-fast-slow demo</a> · <a href="${YT(VID[e.rud].lesson)}" target="_blank" rel="noopener">full lesson</a> <small class="sub">(Vic Firth, free)</small>${VARIANT.includes(e.rud)?`<br><small class="sub">The ${esc(e.rud.toLowerCase())} is the single paradiddle started from a different note, so the single paradiddle demo is the one to learn from.</small>`:""}`;
+  $("#showVid").innerHTML=vidHTML(e.rud);
   $("#showPhase").textContent=`Plays at ${bpm} BPM (your metronome tempo), looping until you stop it.`;
   if(!$("#showDlg").open)$("#showDlg").showModal();
 }
@@ -452,7 +519,7 @@ function stopShow(){show.on=false;clearInterval(show.timer);$("#showPlay").textC
 function playShow(){
   ensureAudio();if(!ac){$("#showPhase").textContent="This browser can't play sound.";return}
   if(metroOn)$("#mToggle").click();
-  const p=EXERCISES[show.ex].play[show.k],L=buildLoop(p,show.groove),tempo=show.half?bpm/2:bpm,sd=60/tempo/p.grid;
+  const p=show.p,L=buildLoop(p,show.groove&&!show.snare),tempo=show.half?bpm/2:bpm,sd=60/tempo/p.grid;
   const t0=ac.currentTime+.12;let n=0,j=0;show.on=true;$("#showPlay").textContent="■ Stop";
   $("#showPhase").textContent=`${Math.round(tempo)} BPM${show.half?" (half speed)":""}`;
   show.timer=setInterval(()=>{
